@@ -20,6 +20,15 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
 
     private final List<Movie> movies = new ArrayList<>();
 
+    public interface OnMovieClickListener {
+        void onMovieClick(Movie movie);
+    }
+
+    private OnMovieClickListener listener;
+
+    public void setOnMovieClickListener(OnMovieClickListener listener) {
+        this.listener = listener;
+    }
     public void setMovies(List<Movie> newMovies) {
         movies.clear();
         movies.addAll(newMovies);
@@ -50,6 +59,10 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
                 .load(url)
                 .placeholder(android.R.color.darker_gray)
                 .into(holder.binding.imgPoster);
+
+        holder.binding.getRoot().setOnClickListener(v -> {
+            if (listener != null) listener.onMovieClick(movie);
+        });
     }
 
     @Override
