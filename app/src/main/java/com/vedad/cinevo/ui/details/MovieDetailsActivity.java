@@ -10,9 +10,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.bumptech.glide.Glide;
 import com.vedad.cinevo.BuildConfig;
+import com.vedad.cinevo.data.local.SavedMovie;
 import com.vedad.cinevo.data.remote.RetrofitClient;
 import com.vedad.cinevo.databinding.ActivityMovieDetailsBinding;
 import com.vedad.cinevo.model.MovieDetails;
@@ -31,6 +33,10 @@ public class MovieDetailsActivity extends AppCompatActivity {
     private static final String BACKDROP_BASE_URL = "https://image.tmdb.org/t/p/w780";
 
     private ActivityMovieDetailsBinding binding;
+    private MovieDetailsViewModel viewModel;
+    private MovieDetails currentDetails;
+    private boolean isFavorite = false;
+    private boolean inWatchlist = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +55,21 @@ public class MovieDetailsActivity extends AppCompatActivity {
             finish();
             return;
         }
+        viewModel = new ViewModelProvider(this).get(MovieDetailsViewModel.class);
+
+        viewModel.countOf(movieId, SavedMovie.FAVORITE).observe(this, count -> {
+            isFavorite = count != null && count > 0;
+            binding.btnFavorite.setText(isFavorite ? "♥ U favoritima" : "♡ Favorit");
+        });
+
+        viewModel.countOf(movieId, SavedMovie.WATCHLIST).observe(this, count -> {
+            inWatchlist = count != null && count > 0;
+            binding.btnWatchlist.setText(inWatchlist ? "✓ Na listi" : "+ Za gledanje");
+        });
+
+        binding.btnFavorite.setOnClickListener(v -> toggle(SavedMovie.FAVORITE, isFavorite));
+        binding.btnWatchlist.setOnClickListener(v -> toggle(SavedMovie.WATCHLIST, inWatchlist));
+
         loadDetails(movieId);
     }
 
@@ -75,6 +96,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
     }
 
     private void showDetails(MovieDetails d) {
+        currentDetails = d;
         binding.tvTitle.setText(d.getTitle());
 
         if (!TextUtils.isEmpty(d.getTagline())) {
@@ -82,7 +104,6 @@ public class MovieDetailsActivity extends AppCompatActivity {
             binding.tvTagline.setVisibility(android.view.View.VISIBLE);
         }
 
-        // Ocjena • godina • trajanje
         List<String> info = new ArrayList<>();
         info.add(String.format(Locale.US, "★ %.1f", d.getVoteAverage()));
         if (d.getReleaseDate() != null && d.getReleaseDate().length() >= 4) {
@@ -93,7 +114,6 @@ public class MovieDetailsActivity extends AppCompatActivity {
         }
         binding.tvInfo.setText(TextUtils.join("  •  ", info));
 
-        // Žanrovi
         if (d.getGenres() != null) {
             List<String> genres = new ArrayList<>();
             for (MovieDetails.Genre g : d.getGenres()) {
@@ -105,7 +125,6 @@ public class MovieDetailsActivity extends AppCompatActivity {
         binding.tvOverview.setText(TextUtils.isEmpty(d.getOverview())
                 ? "Opis nije dostupan." : d.getOverview());
 
-        // Prvih 8 glumaca
         if (d.getCredits() != null && d.getCredits().getCast() != null) {
             List<String> cast = new ArrayList<>();
             for (MovieDetails.Cast c : d.getCredits().getCast()) {
@@ -115,19 +134,36 @@ public class MovieDetailsActivity extends AppCompatActivity {
             binding.tvCast.setText(TextUtils.join(", ", cast));
         }
 
-        // Slika
         String imagePath = d.getBackdropPath() != null ? d.getBackdropPath() : d.getPosterPath();
         if (imagePath != null) {
             Glide.with(this).load(BACKDROP_BASE_URL + imagePath).into(binding.imgBackdrop);
         }
 
-        // Trailer
         String trailerKey = findTrailerKey(d);
         if (trailerKey != null) {
             binding.btnTrailer.setVisibility(android.view.View.VISIBLE);
             binding.btnTrailer.setOnClickListener(v -> startActivity(new Intent(
                     Intent.ACTION_VIEW,
                     Uri.parse("https://www.youtube.com/watch?v=" + trailerKey))));
+        }
+    }
+
+    private void toggle(String listType, boolean alreadySaved) {
+        if (currentDetails == null) return; // detalji se još učitavaju
+
+        if (alreadySaved) {
+            viewModel.remove(currentDetails.getId(), listType);
+        } else {
+            SavedMovie movie = new SavedMovie();
+            movie.id = currentDetails.getId();
+            movie.listType = listType;
+            movie.title = currentDetails.getTitle();
+            movie.posterPath = currentDetails.getPosterPath();
+            movie.voteAverage = currentDetails.getVoteAverage();
+            movie.releaseDate = currentDetails.getReleaseDate();
+            movie.overview = currentDetails.getOverview();
+            movie.addedAt = System.currentTimeMillis();
+            viewModel.add(movie);
         }
     }
 
