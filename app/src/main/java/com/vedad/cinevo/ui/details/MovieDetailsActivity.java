@@ -18,6 +18,7 @@ import com.vedad.cinevo.data.local.SavedMovie;
 import com.vedad.cinevo.data.remote.RetrofitClient;
 import com.vedad.cinevo.databinding.ActivityMovieDetailsBinding;
 import com.vedad.cinevo.model.MovieDetails;
+import com.vedad.cinevo.util.GenreUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -149,7 +150,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
     }
 
     private void toggle(String listType, boolean alreadySaved) {
-        if (currentDetails == null) return; // detalji se još učitavaju
+        if (currentDetails == null) return;
 
         if (alreadySaved) {
             viewModel.remove(currentDetails.getId(), listType);
@@ -162,6 +163,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
             movie.voteAverage = currentDetails.getVoteAverage();
             movie.releaseDate = currentDetails.getReleaseDate();
             movie.overview = currentDetails.getOverview();
+            movie.genreIds = GenreUtils.fromGenres(currentDetails.getGenres());
             movie.addedAt = System.currentTimeMillis();
             viewModel.add(movie);
         }

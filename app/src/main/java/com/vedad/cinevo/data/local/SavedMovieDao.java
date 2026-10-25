@@ -22,4 +22,7 @@ public interface SavedMovieDao {
 
     @Query("SELECT COUNT(*) FROM saved_movies WHERE id = :id AND listType = :listType")
     LiveData<Integer> countOf(int id, String listType);
+
+    @Query("SELECT * FROM saved_movies ORDER BY addedAt DESC")
+    List<SavedMovie> getAll();
 }

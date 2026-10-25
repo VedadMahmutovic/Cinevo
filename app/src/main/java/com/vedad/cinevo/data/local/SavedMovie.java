@@ -20,4 +20,5 @@ public class SavedMovie {
     public String releaseDate;
     public String overview;
     public long addedAt;
+    public String genreIds;
 }

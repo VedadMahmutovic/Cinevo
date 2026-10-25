@@ -2,6 +2,9 @@ package com.vedad.cinevo.model;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.Collections;
+import java.util.List;
+
 public class Movie {
     private int id;
     private String title;
@@ -16,10 +19,28 @@ public class Movie {
     @SerializedName("release_date")
     private String releaseDate;
 
+    @SerializedName("genre_ids")
+    private List<Integer> genreIds;
+
     public int getId() { return id; }
     public String getTitle() { return title; }
     public String getOverview() { return overview; }
     public String getPosterPath() { return posterPath; }
     public double getVoteAverage() { return voteAverage; }
     public String getReleaseDate() { return releaseDate; }
+    public List<Integer> getGenreIds() {
+        return genreIds != null ? genreIds : Collections.emptyList();
+    }
+
+    public Movie() {
+    }
+    public Movie(int id, String title, String overview, String posterPath,
+                 double voteAverage, String releaseDate) {
+        this.id = id;
+        this.title = title;
+        this.overview = overview;
+        this.posterPath = posterPath;
+        this.voteAverage = voteAverage;
+        this.releaseDate = releaseDate;
+    }
 }

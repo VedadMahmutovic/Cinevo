@@ -32,4 +32,22 @@ public interface TmdbApi {
             @Query("query") String query,
             @Query("page") int page
     );
+
+    @GET("discover/movie")
+    Call<MovieResponse> discoverMovies(
+            @Query("api_key") String apiKey,
+            @Query("language") String language,
+            @Query("with_genres") String withGenres,
+            @Query("sort_by") String sortBy,
+            @Query("vote_count.gte") int minVoteCount,
+            @Query("page") int page
+    );
+
+    @GET("movie/{movie_id}/recommendations")
+    Call<MovieResponse> getRecommendations(
+            @Path("movie_id") int movieId,
+            @Query("api_key") String apiKey,
+            @Query("language") String language,
+            @Query("page") int page
+    );
 }

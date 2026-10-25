@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/homeFragment">
+
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.vedad.cinevo.ui.home.HomeFragment"
+        android:label="Početna" />
+
+    <fragment
+        android:id="@+id/savedFragment"
+        android:name="com.vedad.cinevo.ui.saved.SavedFragment"
+        android:label="Moji filmovi" />
+
+    <fragment
+        android:id="@+id/recommendationsFragment"
+        android:name="com.vedad.cinevo.ui.recommendations.RecommendationsFragment"
+        android:label="Za tebe" />
+</navigation>
