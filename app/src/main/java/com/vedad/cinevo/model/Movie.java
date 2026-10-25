@@ -22,6 +22,17 @@ public class Movie {
     @SerializedName("genre_ids")
     private List<Integer> genreIds;
 
+    @SerializedName("vote_count")
+    private int voteCount;
+
+    public int getVoteCount() {
+        return voteCount;
+    }
+
+    public void setVoteCount(int voteCount) {
+        this.voteCount = voteCount;
+    }
+
     public int getId() { return id; }
     public String getTitle() { return title; }
     public String getOverview() { return overview; }
@@ -30,6 +41,9 @@ public class Movie {
     public String getReleaseDate() { return releaseDate; }
     public List<Integer> getGenreIds() {
         return genreIds != null ? genreIds : Collections.emptyList();
+    }
+    public void setGenreIds(List<Integer> genreIds) {
+        this.genreIds = genreIds;
     }
 
     public Movie() {

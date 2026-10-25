@@ -53,12 +53,15 @@ public class RecommendationRepository {
 
         List<Integer> topGenres = RecommendationEngine.topGenres(profile, TOP_GENRES);
         if (!topGenres.isEmpty()) {
-            String genres = TextUtils.join("|", topGenres); // "|" = bilo koji od žanrova
+            String genres = TextUtils.join("|", topGenres);
             Response<MovieResponse> response = api.discoverMovies(
-                            BuildConfig.TMDB_API_KEY, LANGUAGE, genres, "popularity.desc", 100, 1)
+                            BuildConfig.TMDB_API_KEY, LANGUAGE, genres, "popularity.desc",
+                            RecommendationEngine.MIN_VOTE_COUNT, 1)
                     .execute();
             for (Movie m : bodyOrEmpty(response)) {
-                if (m.getPosterPath() != null) candidates.putIfAbsent(m.getId(), m);
+                if (RecommendationEngine.isQualityCandidate(m)) {
+                    candidates.putIfAbsent(m.getId(), m);
+                }
             }
         }
 
@@ -70,7 +73,7 @@ public class RecommendationRepository {
                 Response<MovieResponse> response = api.getRecommendations(
                         s.id, BuildConfig.TMDB_API_KEY, LANGUAGE, 1).execute();
                 for (Movie m : bodyOrEmpty(response)) {
-                    if (m.getPosterPath() == null) continue;
+                    if (!RecommendationEngine.isQualityCandidate(m)) continue;
                     candidates.putIfAbsent(m.getId(), m);
                     recCounts.merge(m.getId(), 1, Integer::sum);
                 }

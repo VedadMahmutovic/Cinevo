@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="28dp"
+        android:adjustViewBounds="true"
+        android:contentDescription="TMDB logo"
+        android:src="@drawable/tmdb_logo" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Cinevo je aplikacija za pregled i preporuku filmova, nastala u sklopu završnog rada."
+        android:textSize="15sp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:text="This product uses the TMDB API but is not endorsed or certified by TMDB."
+        android:textSize="13sp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:text="Verzija 1.0"
+        android:textSize="12sp" />
+
+</LinearLayout>

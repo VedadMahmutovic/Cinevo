@@ -6,13 +6,29 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <androidx.appcompat.widget.SearchView
-        android:id="@+id/searchView"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="12dp"
-        app:iconifiedByDefault="false"
-        app:queryHint="Pretraži filmove..." />
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <androidx.appcompat.widget.SearchView
+            android:id="@+id/searchView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            app:iconifiedByDefault="false"
+            app:queryHint="Pretraži filmove..." />
+
+        <ImageButton
+            android:id="@+id/btnAbout"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="O aplikaciji"
+            android:src="@drawable/ic_info" />
+    </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerMovies"

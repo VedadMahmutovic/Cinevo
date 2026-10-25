@@ -22,6 +22,14 @@ public class RecommendationEngine {
     public static final double W_RATING = 0.2;
     public static final double W_COUNT = 0.2;
 
+    public static final int MIN_VOTE_COUNT = 100;
+    public static final double MIN_RATING = 6.0;
+    public static boolean isQualityCandidate(Movie movie) {
+        return movie.getPosterPath() != null
+                && movie.getVoteCount() >= MIN_VOTE_COUNT
+                && movie.getVoteAverage() >= MIN_RATING;
+    }
+
     public static class ScoredMovie {
         public final Movie movie;
         public final double score;

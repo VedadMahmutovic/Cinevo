@@ -13,8 +13,10 @@ import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.vedad.cinevo.BuildConfig;
 import com.vedad.cinevo.data.remote.RetrofitClient;
+import com.vedad.cinevo.databinding.DialogAboutBinding;
 import com.vedad.cinevo.databinding.FragmentHomeBinding;
 import com.vedad.cinevo.model.Movie;
 import com.vedad.cinevo.model.MovieResponse;
@@ -74,6 +76,7 @@ public class HomeFragment extends Fragment {
             }
         });
 
+        binding.btnAbout.setOnClickListener(v -> showAboutDialog());
         loadPopularMovies();
     }
 
@@ -118,6 +121,15 @@ public class HomeFragment extends Fragment {
                         "Nema veze s internetom", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void showAboutDialog() {
+        DialogAboutBinding dialogBinding = DialogAboutBinding.inflate(getLayoutInflater());
+        new MaterialAlertDialogBuilder(requireContext())
+                .setTitle("O aplikaciji")
+                .setView(dialogBinding.getRoot())
+                .setPositiveButton("U redu", null)
+                .show();
     }
 
     @Override
