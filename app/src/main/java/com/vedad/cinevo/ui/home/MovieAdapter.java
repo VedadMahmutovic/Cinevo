@@ -4,6 +4,7 @@ import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -18,21 +19,45 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
 
     private static final String IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500";
 
-    private final List<Movie> movies = new ArrayList<>();
-
     public interface OnMovieClickListener {
         void onMovieClick(Movie movie);
     }
 
+    private final List<Movie> movies = new ArrayList<>();
     private OnMovieClickListener listener;
 
     public void setOnMovieClickListener(OnMovieClickListener listener) {
         this.listener = listener;
     }
+
     public void setMovies(List<Movie> newMovies) {
+        final List<Movie> oldList = new ArrayList<>(movies);
+
+        DiffUtil.DiffResult diff = DiffUtil.calculateDiff(new DiffUtil.Callback() {
+            @Override
+            public int getOldListSize() {
+                return oldList.size();
+            }
+
+            @Override
+            public int getNewListSize() {
+                return newMovies.size();
+            }
+
+            @Override
+            public boolean areItemsTheSame(int oldPos, int newPos) {
+                return oldList.get(oldPos).getId() == newMovies.get(newPos).getId();
+            }
+
+            @Override
+            public boolean areContentsTheSame(int oldPos, int newPos) {
+                return true;
+            }
+        });
+
         movies.clear();
         movies.addAll(newMovies);
-        notifyDataSetChanged();
+        diff.dispatchUpdatesTo(this);
     }
 
     @NonNull
