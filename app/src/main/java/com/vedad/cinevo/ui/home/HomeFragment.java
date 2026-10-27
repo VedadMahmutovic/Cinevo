@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.vedad.cinevo.databinding.DialogAboutBinding;
 import com.vedad.cinevo.databinding.FragmentHomeBinding;
+import com.vedad.cinevo.model.MovieFilter;
 import com.vedad.cinevo.ui.details.MovieDetailsActivity;
 
 public class HomeFragment extends Fragment {
@@ -65,7 +66,6 @@ public class HomeFragment extends Fragment {
             startActivity(intent);
         });
 
-        binding.searchView.setQuery(viewModel.getQuery(), false);
         binding.searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -83,7 +83,27 @@ public class HomeFragment extends Fragment {
             }
         });
 
-        binding.btnAbout.setOnClickListener(v -> showAboutDialog());
+        binding.btnFilter.setOnClickListener(v ->
+                new FilterBottomSheet().show(getParentFragmentManager(), "filters"));
+
+        binding.btnSettings.setOnClickListener(v -> showAboutDialog());
+
+        binding.tvActiveFilters.setOnClickListener(v -> viewModel.applyFilter(new MovieFilter()));
+
+        viewModel.getQueryLive().observe(getViewLifecycleOwner(), text -> {
+            if (!binding.searchView.getQuery().toString().equals(text)) {
+                binding.searchView.setQuery(text, false);
+            }
+        });
+
+        viewModel.getFilterLive().observe(getViewLifecycleOwner(), f -> {
+            if (f.isActive()) {
+                binding.tvActiveFilters.setText("Filteri: " + f.describe() + "   ✕");
+                binding.tvActiveFilters.setVisibility(View.VISIBLE);
+            } else {
+                binding.tvActiveFilters.setVisibility(View.GONE);
+            }
+        });
 
         viewModel.getMovies().observe(getViewLifecycleOwner(), movies -> adapter.setMovies(movies));
 

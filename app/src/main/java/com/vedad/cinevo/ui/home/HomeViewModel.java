@@ -8,6 +8,7 @@ import com.vedad.cinevo.BuildConfig;
 import com.vedad.cinevo.data.remote.RetrofitClient;
 import com.vedad.cinevo.data.remote.TmdbApi;
 import com.vedad.cinevo.model.Movie;
+import com.vedad.cinevo.model.MovieFilter;
 import com.vedad.cinevo.model.MovieResponse;
 
 import java.util.ArrayList;
@@ -29,11 +30,14 @@ public class HomeViewModel extends ViewModel {
     private final MutableLiveData<List<Movie>> movies = new MutableLiveData<>(new ArrayList<>());
     private final MutableLiveData<Boolean> loading = new MutableLiveData<>(false);
     private final MutableLiveData<String> message = new MutableLiveData<>();
+    private final MutableLiveData<String> queryLive = new MutableLiveData<>("");
+    private final MutableLiveData<MovieFilter> filterLive = new MutableLiveData<>(new MovieFilter());
 
     private final List<Movie> allMovies = new ArrayList<>();
     private final Set<Integer> seenIds = new HashSet<>();
 
     private String query = "";
+    private MovieFilter filter = new MovieFilter();
     private int page = 0;
     private int totalPages = 1;
     private boolean isLoading = false;
@@ -42,7 +46,12 @@ public class HomeViewModel extends ViewModel {
     public LiveData<List<Movie>> getMovies() { return movies; }
     public LiveData<Boolean> getLoading() { return loading; }
     public LiveData<String> getMessage() { return message; }
-    public String getQuery() { return query; }
+    public LiveData<String> getQueryLive() { return queryLive; }
+    public LiveData<MovieFilter> getFilterLive() { return filterLive; }
+
+    public MovieFilter getFilter() {
+        return filter.copy();
+    }
 
     public void clearMessage() {
         message.setValue(null);
@@ -53,10 +62,20 @@ public class HomeViewModel extends ViewModel {
             loadNextPage();
         }
     }
+
     public void setQuery(String newQuery) {
         String q = newQuery == null ? "" : newQuery.trim();
         if (q.equals(query)) return;
         query = q;
+        queryLive.setValue(q);
+        reload();
+    }
+
+    public void applyFilter(MovieFilter newFilter) {
+        filter = newFilter.copy();
+        filterLive.setValue(filter.copy());
+        query = "";
+        queryLive.setValue("");
         reload();
     }
 
@@ -72,6 +91,17 @@ public class HomeViewModel extends ViewModel {
         loadNextPage();
     }
 
+    private Call<MovieResponse> buildCall(int pageNumber) {
+        String key = BuildConfig.TMDB_API_KEY;
+        if (!query.isEmpty()) {
+            return api.searchMovies(key, LANGUAGE, query, pageNumber);
+        }
+        if (filter.isActive()) {
+            return api.discoverWithFilters(key, LANGUAGE, filter.toQueryMap(), pageNumber);
+        }
+        return api.getPopularMovies(key, LANGUAGE, pageNumber);
+    }
+
     public void loadNextPage() {
         if (isLoading || page >= totalPages) return;
 
@@ -79,9 +109,7 @@ public class HomeViewModel extends ViewModel {
         loading.setValue(true);
         final int requestedPage = page + 1;
 
-        Call<MovieResponse> call = query.isEmpty()
-                ? api.getPopularMovies(BuildConfig.TMDB_API_KEY, LANGUAGE, requestedPage)
-                : api.searchMovies(BuildConfig.TMDB_API_KEY, LANGUAGE, query, requestedPage);
+        Call<MovieResponse> call = buildCall(requestedPage);
         currentCall = call;
 
         call.enqueue(new Callback<MovieResponse>() {
@@ -105,8 +133,12 @@ public class HomeViewModel extends ViewModel {
                     }
                     movies.setValue(new ArrayList<>(allMovies));
 
-                    if (allMovies.isEmpty() && !query.isEmpty()) {
-                        message.setValue("Nema rezultata za: " + query);
+                    if (allMovies.isEmpty()) {
+                        if (!query.isEmpty()) {
+                            message.setValue("Nema rezultata za: " + query);
+                        } else if (filter.isActive()) {
+                            message.setValue("Nema filmova za odabrane filtere");
+                        }
                     }
                 } else {
                     message.setValue("Greška: " + response.code());

@@ -3,10 +3,13 @@ package com.vedad.cinevo.data.remote;
 import com.vedad.cinevo.model.MovieDetails;
 import com.vedad.cinevo.model.MovieResponse;
 
+import java.util.Map;
+
 import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
+import retrofit2.http.QueryMap;
 
 public interface TmdbApi {
 
@@ -48,6 +51,14 @@ public interface TmdbApi {
             @Path("movie_id") int movieId,
             @Query("api_key") String apiKey,
             @Query("language") String language,
+            @Query("page") int page
+    );
+
+    @GET("discover/movie")
+    Call<MovieResponse> discoverWithFilters(
+            @Query("api_key") String apiKey,
+            @Query("language") String language,
+            @QueryMap Map<String, String> filters,
             @Query("page") int page
     );
 }

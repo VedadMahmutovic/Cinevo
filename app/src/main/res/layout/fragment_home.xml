@@ -22,13 +22,32 @@
             app:queryHint="Pretraži filmove..." />
 
         <ImageButton
-            android:id="@+id/btnAbout"
+            android:id="@+id/btnFilter"
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="O aplikaciji"
-            android:src="@drawable/ic_info" />
+            android:contentDescription="Filteri"
+            android:src="@drawable/ic_filter" />
+
+        <ImageButton
+            android:id="@+id/btnSettings"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Postavke"
+            android:src="@drawable/ic_settings" />
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/tvActiveFilters"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="12dp"
+        android:background="?attr/selectableItemBackground"
+        android:padding="8dp"
+        android:textSize="13sp"
+        android:visibility="gone" />
 
     <FrameLayout
         android:layout_width="match_parent"
