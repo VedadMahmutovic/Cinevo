@@ -79,6 +79,21 @@ public class HomeViewModel extends ViewModel {
         reload();
     }
 
+    public void setSort(String sortBy) {
+        if (filter.sortBy.equals(sortBy)) return;
+        filter.sortBy = sortBy;
+        filterLive.setValue(filter.copy());
+        query = "";
+        queryLive.setValue("");
+        reload();
+    }
+
+    public void clearFilters() {
+        MovieFilter cleared = new MovieFilter();
+        cleared.sortBy = filter.sortBy;
+        applyFilter(cleared);
+    }
+
     private void reload() {
         if (currentCall != null) currentCall.cancel();
         allMovies.clear();

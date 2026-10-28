@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import com.vedad.cinevo.databinding.FragmentRecommendationsBinding;
 import com.vedad.cinevo.ui.details.MovieDetailsActivity;
 import com.vedad.cinevo.ui.home.MovieAdapter;
+import com.vedad.cinevo.util.AppSettings;
 
 public class RecommendationsFragment extends Fragment {
 
@@ -38,7 +39,7 @@ public class RecommendationsFragment extends Fragment {
         viewModel = new ViewModelProvider(this).get(RecommendationsViewModel.class);
 
         adapter = new MovieAdapter();
-        binding.recyclerRecommendations.setLayoutManager(new GridLayoutManager(requireContext(), 2));
+        binding.recyclerRecommendations.setLayoutManager(new GridLayoutManager(requireContext(), new AppSettings(requireContext()).getGridColumns()));
         binding.recyclerRecommendations.setAdapter(adapter);
 
         adapter.setOnMovieClickListener(movie -> {

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory android:title="Izgled">
+        <ListPreference
+            android:defaultValue="system"
+            android:entries="@array/theme_entries"
+            android:entryValues="@array/theme_values"
+            android:key="pref_theme"
+            android:title="Tema"
+            app:useSimpleSummaryProvider="true" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="Preporuke">
+        <SeekBarPreference
+            android:defaultValue="6"
+            android:key="pref_min_rating"
+            android:max="9"
+            android:summary="Preporuke ispod ove ocjene se ne prikazuju"
+            android:title="Minimalna ocjena"
+            app:min="0"
+            app:showSeekBarValue="true" />
+
+        <SeekBarPreference
+            android:defaultValue="100"
+            android:key="pref_min_votes"
+            android:max="1000"
+            android:summary="Filmovi s manje glasova se ne preporučuju"
+            android:title="Minimalan broj glasova"
+            app:min="0"
+            app:seekBarIncrement="50"
+            app:showSeekBarValue="true" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="Podaci">
+        <Preference
+            android:key="pref_clear_saved"
+            android:summary="Briše sve favorite i listu za gledanje"
+            android:title="Obriši spremljene filmove" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="Ostalo">
+        <Preference
+            android:key="pref_about"
+            android:title="O aplikaciji" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

@@ -18,6 +18,7 @@ import com.vedad.cinevo.databinding.FragmentSavedBinding;
 import com.vedad.cinevo.model.Movie;
 import com.vedad.cinevo.ui.details.MovieDetailsActivity;
 import com.vedad.cinevo.ui.home.MovieAdapter;
+import com.vedad.cinevo.util.AppSettings;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,7 +44,7 @@ public class SavedFragment extends Fragment {
         viewModel = new ViewModelProvider(this).get(SavedViewModel.class);
 
         adapter = new MovieAdapter();
-        binding.recyclerSaved.setLayoutManager(new GridLayoutManager(requireContext(), 2));
+        binding.recyclerSaved.setLayoutManager(new GridLayoutManager(requireContext(), new AppSettings(requireContext()).getGridColumns()));
         binding.recyclerSaved.setAdapter(adapter);
 
         adapter.setOnMovieClickListener(movie -> {

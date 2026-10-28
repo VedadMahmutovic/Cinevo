@@ -26,13 +26,21 @@ public class MovieFilter {
     public Integer runtimeMin;
     public Integer runtimeMax;
     public String sortBy = SORT_POPULARITY;
-
-    public boolean isActive() {
+    public boolean hasFilters() {
         return !genreIds.isEmpty()
                 || yearFrom != null || yearTo != null
                 || minRating > 0f
-                || runtimeMin != null || runtimeMax != null
-                || !SORT_POPULARITY.equals(sortBy);
+                || runtimeMin != null || runtimeMax != null;
+    }
+
+    public boolean isActive() {
+        return hasFilters() || !SORT_POPULARITY.equals(sortBy);
+    }
+
+    public static String sortLabel(String sortBy) {
+        if (SORT_RATING.equals(sortBy)) return "Ocjena";
+        if (SORT_DATE.equals(sortBy)) return "Datum izlaska";
+        return "Popularnost";
     }
 
     public MovieFilter copy() {
@@ -92,9 +100,7 @@ public class MovieFilter {
         if (runtimeMin != null || runtimeMax != null) {
             parts.add(range(runtimeMin, runtimeMax, " min"));
         }
-        if (!SORT_POPULARITY.equals(sortBy)) {
-            parts.add("sort: " + (SORT_RATING.equals(sortBy) ? "ocjena" : "datum"));
-        }
+
         return join(" • ", parts);
     }
 

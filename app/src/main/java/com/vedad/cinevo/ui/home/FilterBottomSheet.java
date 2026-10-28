@@ -51,11 +51,10 @@ public class FilterBottomSheet extends BottomSheetDialogFragment {
         setupYears(current);
         setupRating(current);
         setupRuntime(current);
-        setupSort(current);
         updateLabels();
 
         binding.btnReset.setOnClickListener(v -> {
-            viewModel.applyFilter(new MovieFilter());
+            viewModel.clearFilters();
             dismiss();
         });
         binding.btnApply.setOnClickListener(v -> applyFilter());
@@ -103,15 +102,6 @@ public class FilterBottomSheet extends BottomSheetDialogFragment {
         binding.sliderRuntime.addOnChangeListener((slider, value, fromUser) -> updateLabels());
     }
 
-    private void setupSort(MovieFilter current) {
-        if (MovieFilter.SORT_RATING.equals(current.sortBy)) {
-            binding.chipSortRating.setChecked(true);
-        } else if (MovieFilter.SORT_DATE.equals(current.sortBy)) {
-            binding.chipSortDate.setChecked(true);
-        } else {
-            binding.chipSortPopularity.setChecked(true);
-        }
-    }
     private void updateLabels() {
         List<Float> years = binding.sliderYears.getValues();
         binding.tvYears.setText(String.format(Locale.US, "Godina izdanja: %d – %d",
@@ -155,15 +145,7 @@ public class FilterBottomSheet extends BottomSheetDialogFragment {
         int rMax = Math.round(runtime.get(1));
         f.runtimeMin = rMin > 0 ? rMin : null;
         f.runtimeMax = rMax < RUNTIME_MAX ? rMax : null;
-
-        int checkedSort = binding.chipSort.getCheckedChipId();
-        if (checkedSort == binding.chipSortRating.getId()) {
-            f.sortBy = MovieFilter.SORT_RATING;
-        } else if (checkedSort == binding.chipSortDate.getId()) {
-            f.sortBy = MovieFilter.SORT_DATE;
-        } else {
-            f.sortBy = MovieFilter.SORT_POPULARITY;
-        }
+        f.sortBy = viewModel.getFilter().sortBy;
 
         viewModel.applyFilter(f);
         dismiss();

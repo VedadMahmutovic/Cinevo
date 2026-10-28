@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.PopupMenu;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -15,11 +16,11 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.vedad.cinevo.databinding.DialogAboutBinding;
 import com.vedad.cinevo.databinding.FragmentHomeBinding;
 import com.vedad.cinevo.model.MovieFilter;
 import com.vedad.cinevo.ui.details.MovieDetailsActivity;
+import com.vedad.cinevo.ui.settings.SettingsActivity;
+import com.vedad.cinevo.util.AppSettings;
 
 public class HomeFragment extends Fragment {
 
@@ -42,9 +43,11 @@ public class HomeFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         viewModel = new ViewModelProvider(requireActivity()).get(HomeViewModel.class);
+        AppSettings settings = new AppSettings(requireContext());
 
         adapter = new MovieAdapter();
-        GridLayoutManager layoutManager = new GridLayoutManager(requireContext(), 2);
+        GridLayoutManager layoutManager =
+                new GridLayoutManager(requireContext(), settings.getGridColumns());
         binding.recyclerMovies.setLayoutManager(layoutManager);
         binding.recyclerMovies.setAdapter(adapter);
 
@@ -83,12 +86,40 @@ public class HomeFragment extends Fragment {
             }
         });
 
-        binding.btnFilter.setOnClickListener(v ->
-                new FilterBottomSheet().show(getParentFragmentManager(), "filters"));
+        binding.btnFilter.setOnClickListener(v -> openFilters());
 
-        binding.btnSettings.setOnClickListener(v -> showAboutDialog());
+        binding.btnSettings.setOnClickListener(v ->
+                startActivity(new Intent(requireContext(), SettingsActivity.class)));
 
-        binding.tvActiveFilters.setOnClickListener(v -> viewModel.applyFilter(new MovieFilter()));
+        binding.btnGrid.setOnClickListener(v -> {
+            int next = layoutManager.getSpanCount() == 2 ? 3 : 2;
+            layoutManager.setSpanCount(next);
+            settings.setGridColumns(next);
+        });
+
+        binding.btnSort.setOnClickListener(v -> {
+            PopupMenu popup = new PopupMenu(requireContext(), binding.btnSort);
+            popup.getMenu().add(0, 1, 0, MovieFilter.sortLabel(MovieFilter.SORT_POPULARITY));
+            popup.getMenu().add(0, 2, 1, MovieFilter.sortLabel(MovieFilter.SORT_RATING));
+            popup.getMenu().add(0, 3, 2, MovieFilter.sortLabel(MovieFilter.SORT_DATE));
+            popup.setOnMenuItemClickListener(item -> {
+                switch (item.getItemId()) {
+                    case 2:
+                        viewModel.setSort(MovieFilter.SORT_RATING);
+                        break;
+                    case 3:
+                        viewModel.setSort(MovieFilter.SORT_DATE);
+                        break;
+                    default:
+                        viewModel.setSort(MovieFilter.SORT_POPULARITY);
+                }
+                return true;
+            });
+            popup.show();
+        });
+
+        binding.chipActiveFilters.setOnClickListener(v -> openFilters());
+        binding.chipActiveFilters.setOnCloseIconClickListener(v -> viewModel.clearFilters());
 
         viewModel.getQueryLive().observe(getViewLifecycleOwner(), text -> {
             if (!binding.searchView.getQuery().toString().equals(text)) {
@@ -97,11 +128,12 @@ public class HomeFragment extends Fragment {
         });
 
         viewModel.getFilterLive().observe(getViewLifecycleOwner(), f -> {
-            if (f.isActive()) {
-                binding.tvActiveFilters.setText("Filteri: " + f.describe() + "   ✕");
-                binding.tvActiveFilters.setVisibility(View.VISIBLE);
+            binding.btnSort.setText("Sortiraj: " + MovieFilter.sortLabel(f.sortBy) + " ▾");
+            if (f.hasFilters()) {
+                binding.chipActiveFilters.setText("Filteri: " + f.describe());
+                binding.chipActiveFilters.setVisibility(View.VISIBLE);
             } else {
-                binding.tvActiveFilters.setVisibility(View.GONE);
+                binding.chipActiveFilters.setVisibility(View.GONE);
             }
         });
 
@@ -120,13 +152,8 @@ public class HomeFragment extends Fragment {
         viewModel.loadFirstPageIfNeeded();
     }
 
-    private void showAboutDialog() {
-        DialogAboutBinding dialogBinding = DialogAboutBinding.inflate(getLayoutInflater());
-        new MaterialAlertDialogBuilder(requireContext())
-                .setTitle("O aplikaciji")
-                .setView(dialogBinding.getRoot())
-                .setPositiveButton("U redu", null)
-                .show();
+    private void openFilters() {
+        new FilterBottomSheet().show(getParentFragmentManager(), "filters");
     }
 
     @Override

@@ -33,4 +33,8 @@ public class SavedMovieRepository {
     public void remove(int id, String listType) {
         AppDatabase.databaseExecutor.execute(() -> dao.delete(id, listType));
     }
+
+    public void clearAll() {
+        AppDatabase.databaseExecutor.execute(dao::deleteAll);
+    }
 }

@@ -13,6 +13,7 @@ import com.vedad.cinevo.data.remote.TmdbApi;
 import com.vedad.cinevo.model.Movie;
 import com.vedad.cinevo.model.MovieResponse;
 import com.vedad.cinevo.recommendation.RecommendationEngine;
+import com.vedad.cinevo.util.AppSettings;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -36,15 +37,20 @@ public class RecommendationRepository {
     private static final int RESULT_LIMIT = 20;
 
     private final SavedMovieDao dao;
+    private final AppSettings settings;
     private final TmdbApi api = RetrofitClient.getApi();
 
     public RecommendationRepository(Context context) {
         dao = AppDatabase.getInstance(context).savedMovieDao();
+        settings = new AppSettings(context);
     }
 
     public List<Movie> compute() throws IOException {
         List<SavedMovie> saved = dao.getAll();
         if (saved.isEmpty()) return new ArrayList<>();
+
+        double minRating = settings.getMinRating();
+        int minVotes = settings.getMinVotes();
 
         Map<Integer, Double> profile = RecommendationEngine.buildProfile(saved);
         Map<Integer, Movie> candidates = new LinkedHashMap<>();
@@ -56,10 +62,10 @@ public class RecommendationRepository {
             String genres = TextUtils.join("|", topGenres);
             Response<MovieResponse> response = api.discoverMovies(
                             BuildConfig.TMDB_API_KEY, LANGUAGE, genres, "popularity.desc",
-                            RecommendationEngine.MIN_VOTE_COUNT, 1)
+                            minVotes, 1)
                     .execute();
             for (Movie m : bodyOrEmpty(response)) {
-                if (RecommendationEngine.isQualityCandidate(m)) {
+                if (RecommendationEngine.isQualityCandidate(m, minRating, minVotes)) {
                     candidates.putIfAbsent(m.getId(), m);
                 }
             }
@@ -73,7 +79,7 @@ public class RecommendationRepository {
                 Response<MovieResponse> response = api.getRecommendations(
                         s.id, BuildConfig.TMDB_API_KEY, LANGUAGE, 1).execute();
                 for (Movie m : bodyOrEmpty(response)) {
-                    if (!RecommendationEngine.isQualityCandidate(m)) continue;
+                    if (!RecommendationEngine.isQualityCandidate(m, minRating, minVotes)) continue;
                     candidates.putIfAbsent(m.getId(), m);
                     recCounts.merge(m.getId(), 1, Integer::sum);
                 }

@@ -74,13 +74,6 @@
             android:valueFrom="0"
             android:valueTo="240" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="Sortiraj po"
-            android:textStyle="bold" />
-
         <com.google.android.material.chip.ChipGroup
             android:id="@+id/chipSort"
             android:layout_width="match_parent"

@@ -24,10 +24,15 @@ public class RecommendationEngine {
 
     public static final int MIN_VOTE_COUNT = 100;
     public static final double MIN_RATING = 6.0;
+
     public static boolean isQualityCandidate(Movie movie) {
+        return isQualityCandidate(movie, MIN_RATING, MIN_VOTE_COUNT);
+    }
+
+    public static boolean isQualityCandidate(Movie movie, double minRating, int minVotes) {
         return movie.getPosterPath() != null
-                && movie.getVoteCount() >= MIN_VOTE_COUNT
-                && movie.getVoteAverage() >= MIN_RATING;
+                && movie.getVoteCount() >= minVotes
+                && movie.getVoteAverage() >= minRating;
     }
 
     public static class ScoredMovie {

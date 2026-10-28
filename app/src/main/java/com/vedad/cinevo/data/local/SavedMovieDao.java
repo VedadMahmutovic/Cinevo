@@ -25,4 +25,7 @@ public interface SavedMovieDao {
 
     @Query("SELECT * FROM saved_movies ORDER BY addedAt DESC")
     List<SavedMovie> getAll();
+
+    @Query("DELETE FROM saved_movies")
+    void deleteAll();
 }
