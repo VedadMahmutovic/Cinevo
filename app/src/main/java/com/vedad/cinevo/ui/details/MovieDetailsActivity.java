@@ -11,13 +11,16 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.bumptech.glide.Glide;
 import com.vedad.cinevo.BuildConfig;
 import com.vedad.cinevo.data.local.SavedMovie;
 import com.vedad.cinevo.data.remote.RetrofitClient;
 import com.vedad.cinevo.databinding.ActivityMovieDetailsBinding;
+import com.vedad.cinevo.model.Movie;
 import com.vedad.cinevo.model.MovieDetails;
+import com.vedad.cinevo.ui.home.MovieAdapter;
 import com.vedad.cinevo.util.GenreUtils;
 
 import java.util.ArrayList;
@@ -38,6 +41,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
     private MovieDetails currentDetails;
     private boolean isFavorite = false;
     private boolean inWatchlist = false;
+    private MovieAdapter similarAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +62,17 @@ public class MovieDetailsActivity extends AppCompatActivity {
         }
         viewModel = new ViewModelProvider(this).get(MovieDetailsViewModel.class);
 
+        similarAdapter = new MovieAdapter();
+        similarAdapter.setFixedItemWidth((int) (130 * getResources().getDisplayMetrics().density));
+        binding.recyclerSimilar.setLayoutManager(
+                new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        binding.recyclerSimilar.setAdapter(similarAdapter);
+        similarAdapter.setOnMovieClickListener(movie -> {
+            Intent intent = new Intent(this, MovieDetailsActivity.class);
+            intent.putExtra(EXTRA_MOVIE_ID, movie.getId());
+            startActivity(intent);
+        });
+
         viewModel.countOf(movieId, SavedMovie.FAVORITE).observe(this, count -> {
             isFavorite = count != null && count > 0;
             binding.btnFavorite.setText(isFavorite ? "♥ U favoritima" : "♡ Favorit");
@@ -71,12 +86,32 @@ public class MovieDetailsActivity extends AppCompatActivity {
         binding.btnFavorite.setOnClickListener(v -> toggle(SavedMovie.FAVORITE, isFavorite));
         binding.btnWatchlist.setOnClickListener(v -> toggle(SavedMovie.WATCHLIST, inWatchlist));
 
+        viewModel.ratingOf(movieId).observe(this, rating -> {
+            int value = rating == null ? 0 : rating;
+            binding.ratingBar.setRating(value);
+            binding.tvRatingHint.setText(value == 0 ? "Ocijeni film" : "Tvoja ocjena: " + value + "/5");
+            binding.btnRemoveRating.setVisibility(
+                    value == 0 ? android.view.View.GONE : android.view.View.VISIBLE);
+        });
+
+        binding.ratingBar.setOnRatingBarChangeListener((bar, rating, fromUser) -> {
+            if (!fromUser || currentDetails == null) return;
+            int value = Math.round(rating);
+            if (value >= 1) saveRating(value);
+        });
+
+        binding.btnRemoveRating.setOnClickListener(v -> {
+            if (currentDetails != null) {
+                viewModel.remove(currentDetails.getId(), SavedMovie.WATCHED);
+            }
+        });
+
         loadDetails(movieId);
     }
 
     private void loadDetails(int movieId) {
         RetrofitClient.getApi()
-                .getMovieDetails(movieId, BuildConfig.TMDB_API_KEY, "en-US", "videos,credits")
+                .getMovieDetails(movieId, BuildConfig.TMDB_API_KEY, "en-US", "videos,credits,recommendations")
                 .enqueue(new Callback<MovieDetails>() {
                     @Override
                     public void onResponse(Call<MovieDetails> call, Response<MovieDetails> response) {
@@ -98,6 +133,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
 
     private void showDetails(MovieDetails d) {
         currentDetails = d;
+        binding.sectionRating.setVisibility(android.view.View.VISIBLE);
         binding.tvTitle.setText(d.getTitle());
 
         if (!TextUtils.isEmpty(d.getTagline())) {
@@ -147,6 +183,31 @@ public class MovieDetailsActivity extends AppCompatActivity {
                     Intent.ACTION_VIEW,
                     Uri.parse("https://www.youtube.com/watch?v=" + trailerKey))));
         }
+
+        if (d.getRecommendations() != null && d.getRecommendations().getResults() != null) {
+            List<Movie> similar = new ArrayList<>();
+            for (Movie m : d.getRecommendations().getResults()) {
+                if (m.getPosterPath() != null) similar.add(m);
+            }
+            if (!similar.isEmpty()) {
+                similarAdapter.setMovies(similar);
+                binding.sectionSimilar.setVisibility(android.view.View.VISIBLE);
+            }
+        }
+    }
+
+    private SavedMovie buildSavedMovie(String listType) {
+        SavedMovie movie = new SavedMovie();
+        movie.id = currentDetails.getId();
+        movie.listType = listType;
+        movie.title = currentDetails.getTitle();
+        movie.posterPath = currentDetails.getPosterPath();
+        movie.voteAverage = currentDetails.getVoteAverage();
+        movie.releaseDate = currentDetails.getReleaseDate();
+        movie.overview = currentDetails.getOverview();
+        movie.genreIds = GenreUtils.fromGenres(currentDetails.getGenres());
+        movie.addedAt = System.currentTimeMillis();
+        return movie;
     }
 
     private void toggle(String listType, boolean alreadySaved) {
@@ -155,18 +216,15 @@ public class MovieDetailsActivity extends AppCompatActivity {
         if (alreadySaved) {
             viewModel.remove(currentDetails.getId(), listType);
         } else {
-            SavedMovie movie = new SavedMovie();
-            movie.id = currentDetails.getId();
-            movie.listType = listType;
-            movie.title = currentDetails.getTitle();
-            movie.posterPath = currentDetails.getPosterPath();
-            movie.voteAverage = currentDetails.getVoteAverage();
-            movie.releaseDate = currentDetails.getReleaseDate();
-            movie.overview = currentDetails.getOverview();
-            movie.genreIds = GenreUtils.fromGenres(currentDetails.getGenres());
-            movie.addedAt = System.currentTimeMillis();
-            viewModel.add(movie);
+            viewModel.add(buildSavedMovie(listType));
         }
+    }
+
+    private void saveRating(int value) {
+        SavedMovie movie = buildSavedMovie(SavedMovie.WATCHED);
+        movie.userRating = value;
+        viewModel.add(movie);
+        viewModel.remove(currentDetails.getId(), SavedMovie.WATCHLIST);
     }
 
     private String findTrailerKey(MovieDetails d) {

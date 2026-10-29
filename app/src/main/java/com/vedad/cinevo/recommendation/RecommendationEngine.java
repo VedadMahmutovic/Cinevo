@@ -45,11 +45,13 @@ public class RecommendationEngine {
         }
     }
 
+
     public static Map<Integer, Double> buildProfile(List<SavedMovie> saved) {
         Map<Integer, Double> profile = new HashMap<>();
         for (SavedMovie s : saved) {
-            double weight = SavedMovie.FAVORITE.equals(s.listType)
-                    ? WEIGHT_FAVORITE : WEIGHT_WATCHLIST;
+            double weight = weightOf(s);
+            if (weight == 0.0) continue;
+
             for (int genreId : new HashSet<>(GenreUtils.parse(s.genreIds))) {
                 Double current = profile.get(genreId);
                 profile.put(genreId, (current == null ? 0.0 : current) + weight);
@@ -58,13 +60,15 @@ public class RecommendationEngine {
         return profile;
     }
 
+
     public static List<Integer> topGenres(Map<Integer, Double> profile, int n) {
         List<Map.Entry<Integer, Double>> entries = new ArrayList<>(profile.entrySet());
         Collections.sort(entries, (a, b) -> Double.compare(b.getValue(), a.getValue()));
 
         List<Integer> result = new ArrayList<>();
-        for (int i = 0; i < Math.min(n, entries.size()); i++) {
-            result.add(entries.get(i).getKey());
+        for (Map.Entry<Integer, Double> e : entries) {
+            if (result.size() == n) break;
+            if (e.getValue() > 0) result.add(e.getKey());
         }
         return result;
     }
@@ -84,6 +88,7 @@ public class RecommendationEngine {
             normProfile += w * w;
         }
         normProfile = Math.sqrt(normProfile);
+        if (normProfile == 0.0) return 0.0;
         double normMovie = Math.sqrt(genres.size());
 
         return dot / (normProfile * normMovie);
@@ -114,5 +119,14 @@ public class RecommendationEngine {
 
         Collections.sort(scored, (a, b) -> Double.compare(b.score, a.score));
         return scored.size() > limit ? new ArrayList<>(scored.subList(0, limit)) : scored;
+    }
+
+    public static double weightOf(SavedMovie s) {
+        if (SavedMovie.FAVORITE.equals(s.listType)) return WEIGHT_FAVORITE;
+        if (SavedMovie.WATCHLIST.equals(s.listType)) return WEIGHT_WATCHLIST;
+        if (SavedMovie.WATCHED.equals(s.listType) && s.userRating >= 1) {
+            return (s.userRating - 3) / 2.0;
+        }
+        return 0.0;
     }
 }

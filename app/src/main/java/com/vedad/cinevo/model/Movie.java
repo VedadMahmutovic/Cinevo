@@ -9,6 +9,7 @@ public class Movie {
     private int id;
     private String title;
     private String overview;
+    private transient int userRating;
 
     @SerializedName("poster_path")
     private String posterPath;
@@ -38,6 +39,7 @@ public class Movie {
     public String getOverview() { return overview; }
     public String getPosterPath() { return posterPath; }
     public double getVoteAverage() { return voteAverage; }
+    public int getUserRating() { return userRating; }
     public String getReleaseDate() { return releaseDate; }
     public List<Integer> getGenreIds() {
         return genreIds != null ? genreIds : Collections.emptyList();
@@ -57,4 +59,5 @@ public class Movie {
         this.voteAverage = voteAverage;
         this.releaseDate = releaseDate;
     }
+    public void setUserRating(int userRating) { this.userRating = userRating; }
 }

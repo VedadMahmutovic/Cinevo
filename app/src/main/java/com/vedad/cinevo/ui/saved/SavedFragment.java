@@ -25,6 +25,10 @@ import java.util.List;
 
 public class SavedFragment extends Fragment {
 
+    private static final String[] TYPES = {
+            SavedMovie.FAVORITE, SavedMovie.WATCHLIST, SavedMovie.WATCHED
+    };
+
     private FragmentSavedBinding binding;
     private SavedViewModel viewModel;
     private MovieAdapter adapter;
@@ -44,7 +48,8 @@ public class SavedFragment extends Fragment {
         viewModel = new ViewModelProvider(this).get(SavedViewModel.class);
 
         adapter = new MovieAdapter();
-        binding.recyclerSaved.setLayoutManager(new GridLayoutManager(requireContext(), new AppSettings(requireContext()).getGridColumns()));
+        binding.recyclerSaved.setLayoutManager(new GridLayoutManager(
+                requireContext(), new AppSettings(requireContext()).getGridColumns()));
         binding.recyclerSaved.setAdapter(adapter);
 
         adapter.setOnMovieClickListener(movie -> {
@@ -53,15 +58,17 @@ public class SavedFragment extends Fragment {
             startActivity(intent);
         });
 
-        int startTab = SavedMovie.WATCHLIST.equals(viewModel.getSelectedType()) ? 1 : 0;
+        int startTab = 0;
+        for (int i = 0; i < TYPES.length; i++) {
+            if (TYPES[i].equals(viewModel.getSelectedType())) startTab = i;
+        }
         TabLayout.Tab tab = binding.tabLayout.getTabAt(startTab);
         if (tab != null) tab.select();
 
         binding.tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                viewModel.selectType(tab.getPosition() == 0
-                        ? SavedMovie.FAVORITE : SavedMovie.WATCHLIST);
+                viewModel.selectType(TYPES[tab.getPosition()]);
             }
 
             @Override
@@ -74,16 +81,22 @@ public class SavedFragment extends Fragment {
         viewModel.getSaved().observe(getViewLifecycleOwner(), list -> {
             List<Movie> movies = new ArrayList<>();
             for (SavedMovie s : list) {
-                movies.add(new Movie(s.id, s.title, s.overview,
-                        s.posterPath, s.voteAverage, s.releaseDate));
+                Movie m = new Movie(s.id, s.title, s.overview,
+                        s.posterPath, s.voteAverage, s.releaseDate);
+                m.setUserRating(s.userRating);
+                movies.add(m);
             }
             adapter.setMovies(movies);
 
-            boolean isFavoriteTab = SavedMovie.FAVORITE.equals(viewModel.getSelectedType());
-            binding.tvEmpty.setText(isFavoriteTab
-                    ? "Još nemaš favorita." : "Lista za gledanje je prazna.");
+            binding.tvEmpty.setText(emptyMessage(viewModel.getSelectedType()));
             binding.tvEmpty.setVisibility(movies.isEmpty() ? View.VISIBLE : View.GONE);
         });
+    }
+
+    private String emptyMessage(String type) {
+        if (SavedMovie.WATCHLIST.equals(type)) return "Lista za gledanje je prazna.";
+        if (SavedMovie.WATCHED.equals(type)) return "Još nisi ocijenio nijedan film.";
+        return "Još nemaš favorita.";
     }
 
     @Override

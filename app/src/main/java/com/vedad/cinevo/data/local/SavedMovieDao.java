@@ -28,4 +28,7 @@ public interface SavedMovieDao {
 
     @Query("DELETE FROM saved_movies")
     void deleteAll();
+
+    @Query("SELECT userRating FROM saved_movies WHERE id = :id AND listType = 'WATCHED'")
+    LiveData<Integer> ratingOf(int id);
 }

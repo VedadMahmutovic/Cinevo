@@ -37,4 +37,8 @@ public class SavedMovieRepository {
     public void clearAll() {
         AppDatabase.databaseExecutor.execute(dao::deleteAll);
     }
+
+    public LiveData<Integer> ratingOf(int id) {
+        return dao.ratingOf(id);
+    }
 }

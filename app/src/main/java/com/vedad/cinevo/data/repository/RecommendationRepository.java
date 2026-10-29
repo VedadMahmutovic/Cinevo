@@ -71,10 +71,13 @@ public class RecommendationRepository {
             }
         }
 
+        Set<Integer> seededIds = new HashSet<>();
         int used = 0;
         for (SavedMovie s : saved) {
             excludeIds.add(s.id);
-            if (SavedMovie.FAVORITE.equals(s.listType) && used < MAX_FAVORITES_FOR_B) {
+            boolean positiveSeed = SavedMovie.FAVORITE.equals(s.listType)
+                    || (SavedMovie.WATCHED.equals(s.listType) && s.userRating >= 4);
+            if (positiveSeed && used < MAX_FAVORITES_FOR_B && seededIds.add(s.id)) {
                 used++;
                 Response<MovieResponse> response = api.getRecommendations(
                         s.id, BuildConfig.TMDB_API_KEY, LANGUAGE, 1).execute();

@@ -51,6 +51,12 @@ public class RecommendationEngineTest {
         return RecommendationEngine.rank(profile, candidates, recCounts, exclude, limit);
     }
 
+    private SavedMovie watched(int id, int rating, String genres) {
+        SavedMovie s = saved(id, SavedMovie.WATCHED, genres);
+        s.userRating = rating;
+        return s;
+    }
+
     @Test
     public void buildProfile_favoriteCountsMoreThanWatchlist() {
         List<SavedMovie> saved = Arrays.asList(
@@ -193,5 +199,52 @@ public class RecommendationEngineTest {
         assertFalse(RecommendationEngine.isQualityCandidate(fewVotes));
         assertFalse(RecommendationEngine.isQualityCandidate(noPoster));
         assertTrue(RecommendationEngine.isQualityCandidate(boundary));
+    }
+
+    @Test
+    public void buildProfile_ratingsMapToSignedWeights() {
+        List<SavedMovie> saved = Arrays.asList(
+                watched(1, 5, "28"),
+                watched(2, 1, "35"),
+                watched(3, 3, "18"));
+
+        Map<Integer, Double> profile = RecommendationEngine.buildProfile(saved);
+
+        assertEquals(1.0, profile.get(28), DELTA);
+        assertEquals(-1.0, profile.get(35), DELTA);
+        assertFalse(profile.containsKey(18));
+    }
+
+    @Test
+    public void topGenres_ignoresNonPositiveWeights() {
+        Map<Integer, Double> profile = profileOf(28, 1.0, 35, -1.0, 12, 0.0);
+
+        assertEquals(Arrays.asList(28), RecommendationEngine.topGenres(profile, 3));
+    }
+
+    @Test
+    public void cosine_negativeWeightLowersScore() {
+        Map<Integer, Double> profile = profileOf(28, 1.0, 35, -1.0);
+
+        assertEquals(-1.0 / Math.sqrt(2),
+                RecommendationEngine.cosineSimilarity(profile, Arrays.asList(35)), DELTA);
+    }
+
+    @Test
+    public void cosine_zeroProfileIsZeroNotNaN() {
+        Map<Integer, Double> profile = profileOf(18, 0.0);
+
+        assertEquals(0.0, RecommendationEngine.cosineSimilarity(profile, Arrays.asList(18)), DELTA);
+    }
+
+    @Test
+    public void rank_dislikedGenreRanksLower() {
+        Map<Integer, Double> profile = profileOf(27, 1.0, 35, -1.0);
+
+        List<RecommendationEngine.ScoredMovie> ranked = rank(profile,
+                Arrays.asList(movie(1, 7.0, 35), movie(2, 7.0, 27)),
+                new HashMap<Integer, Integer>(), new HashSet<Integer>(), 10);
+
+        assertEquals(2, ranked.get(0).movie.getId());
     }
 }

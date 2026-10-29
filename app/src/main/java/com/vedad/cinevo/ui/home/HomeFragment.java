@@ -102,6 +102,7 @@ public class HomeFragment extends Fragment {
             popup.getMenu().add(0, 1, 0, MovieFilter.sortLabel(MovieFilter.SORT_POPULARITY));
             popup.getMenu().add(0, 2, 1, MovieFilter.sortLabel(MovieFilter.SORT_RATING));
             popup.getMenu().add(0, 3, 2, MovieFilter.sortLabel(MovieFilter.SORT_DATE));
+            popup.getMenu().add(0, 4, 3, MovieFilter.sortLabel(MovieFilter.SORT_DATE_ASC));
             popup.setOnMenuItemClickListener(item -> {
                 switch (item.getItemId()) {
                     case 2:
@@ -109,6 +110,9 @@ public class HomeFragment extends Fragment {
                         break;
                     case 3:
                         viewModel.setSort(MovieFilter.SORT_DATE);
+                        break;
+                    case 4:
+                        viewModel.setSort(MovieFilter.SORT_DATE_ASC);
                         break;
                     default:
                         viewModel.setSort(MovieFilter.SORT_POPULARITY);

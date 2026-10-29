@@ -1,6 +1,7 @@
 package com.vedad.cinevo.data.local;
 
 import androidx.annotation.NonNull;
+import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 
 @Entity(tableName = "saved_movies", primaryKeys = {"id", "listType"})
@@ -8,6 +9,7 @@ public class SavedMovie {
 
     public static final String FAVORITE = "FAVORITE";
     public static final String WATCHLIST = "WATCHLIST";
+    public static final String WATCHED = "WATCHED";
 
     public int id;
 
@@ -21,4 +23,7 @@ public class SavedMovie {
     public String overview;
     public long addedAt;
     public String genreIds;
+
+    @ColumnInfo(defaultValue = "0")
+    public int userRating;
 }

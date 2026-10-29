@@ -10,6 +10,7 @@ public class MovieDetails {
     private String tagline;
     private String overview;
     private int runtime;
+    private Recommendations recommendations;
 
     @SerializedName("poster_path")
     private String posterPath;
@@ -39,6 +40,7 @@ public class MovieDetails {
     public List<Genre> getGenres() { return genres; }
     public Videos getVideos() { return videos; }
     public Credits getCredits() { return credits; }
+    public Recommendations getRecommendations() { return recommendations; }
 
     public static class Genre {
         private int id;
@@ -74,5 +76,11 @@ public class MovieDetails {
         private String name;
 
         public String getName() { return name; }
+    }
+
+    public static class Recommendations {
+        private List<Movie> results;
+
+        public List<Movie> getResults() { return results; }
     }
 }

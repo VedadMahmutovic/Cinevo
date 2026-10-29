@@ -18,6 +18,7 @@ public class MovieFilter {
     public static final String SORT_POPULARITY = "popularity.desc";
     public static final String SORT_RATING = "vote_average.desc";
     public static final String SORT_DATE = "primary_release_date.desc";
+    public static final String SORT_DATE_ASC = "primary_release_date.asc";
 
     public Set<Integer> genreIds = new LinkedHashSet<>();
     public Integer yearFrom;
@@ -39,7 +40,8 @@ public class MovieFilter {
 
     public static String sortLabel(String sortBy) {
         if (SORT_RATING.equals(sortBy)) return "Ocjena";
-        if (SORT_DATE.equals(sortBy)) return "Datum izlaska";
+        if (SORT_DATE.equals(sortBy)) return "Najnoviji prvo";
+        if (SORT_DATE_ASC.equals(sortBy)) return "Najstariji prvo";
         return "Popularnost";
     }
 
@@ -74,7 +76,8 @@ public class MovieFilter {
 
         if (minRating > 0f) map.put("vote_average.gte", String.valueOf(minRating));
 
-        int minVotes = SORT_RATING.equals(sortBy) ? 300 : (minRating > 0f ? 50 : 0);
+        boolean dateSort = SORT_DATE.equals(sortBy) || SORT_DATE_ASC.equals(sortBy);
+        int minVotes = SORT_RATING.equals(sortBy) ? 300 : (dateSort ? 50 : (minRating > 0f ? 50 : 0));
         if (minVotes > 0) map.put("vote_count.gte", String.valueOf(minVotes));
 
         if (runtimeMin != null) map.put("with_runtime.gte", String.valueOf(runtimeMin));

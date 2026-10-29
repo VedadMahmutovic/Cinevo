@@ -51,7 +51,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
 
             @Override
             public boolean areContentsTheSame(int oldPos, int newPos) {
-                return true;
+                return oldList.get(oldPos).getUserRating() == newMovies.get(newPos).getUserRating();
             }
         });
 
@@ -65,6 +65,11 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
     public MovieViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         ItemMovieBinding binding = ItemMovieBinding.inflate(
                 LayoutInflater.from(parent.getContext()), parent, false);
+        if (fixedItemWidth > 0) {
+            ViewGroup.LayoutParams params = binding.getRoot().getLayoutParams();
+            params.width = fixedItemWidth;
+            binding.getRoot().setLayoutParams(params);
+        }
         return new MovieViewHolder(binding);
     }
 
@@ -73,8 +78,13 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
         Movie movie = movies.get(position);
 
         holder.binding.tvTitle.setText(movie.getTitle());
-        holder.binding.tvRating.setText(
-                String.format(Locale.US, "★ %.1f", movie.getVoteAverage()));
+        if (movie.getUserRating() > 0) {
+            holder.binding.tvRating.setText(
+                    String.format(Locale.US, "Tvoja ocjena: ★ %d/5", movie.getUserRating()));
+        } else {
+            holder.binding.tvRating.setText(
+                    String.format(Locale.US, "★ %.1f", movie.getVoteAverage()));
+        }
 
         String url = movie.getPosterPath() != null
                 ? IMAGE_BASE_URL + movie.getPosterPath()
@@ -102,5 +112,11 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
             super(binding.getRoot());
             this.binding = binding;
         }
+    }
+
+    private int fixedItemWidth = 0;
+
+    public void setFixedItemWidth(int widthPx) {
+        this.fixedItemWidth = widthPx;
     }
 }

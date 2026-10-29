@@ -29,4 +29,8 @@ public class MovieDetailsViewModel extends AndroidViewModel {
     public void remove(int movieId, String listType) {
         repository.remove(movieId, listType);
     }
+
+    public LiveData<Integer> ratingOf(int movieId) {
+        return repository.ratingOf(movieId);
+    }
 }
