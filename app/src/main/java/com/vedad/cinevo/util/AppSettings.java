@@ -12,6 +12,7 @@ public class AppSettings {
     public static final String KEY_MIN_RATING = "pref_min_rating";
     public static final String KEY_MIN_VOTES = "pref_min_votes";
     private static final String KEY_GRID_COLUMNS = "pref_grid_columns";
+    public static final String KEY_WATCH_REGION = "pref_watch_region";
 
     private final SharedPreferences prefs;
 
@@ -43,5 +44,9 @@ public class AppSettings {
 
     public void setGridColumns(int columns) {
         prefs.edit().putInt(KEY_GRID_COLUMNS, columns).apply();
+    }
+
+    public String getWatchRegion() {
+        return prefs.getString(KEY_WATCH_REGION, "BA");
     }
 }

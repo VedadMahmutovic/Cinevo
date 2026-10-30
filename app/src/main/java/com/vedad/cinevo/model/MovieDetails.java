@@ -3,6 +3,7 @@ package com.vedad.cinevo.model;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
+import java.util.Map;
 
 public class MovieDetails {
     private int id;
@@ -24,6 +25,9 @@ public class MovieDetails {
     @SerializedName("release_date")
     private String releaseDate;
 
+    @SerializedName("watch/providers")
+    private WatchProviders watchProviders;
+
     private List<Genre> genres;
     private Videos videos;
     private Credits credits;
@@ -41,6 +45,7 @@ public class MovieDetails {
     public Videos getVideos() { return videos; }
     public Credits getCredits() { return credits; }
     public Recommendations getRecommendations() { return recommendations; }
+    public WatchProviders getWatchProviders() { return watchProviders; }
 
     public static class Genre {
         private int id;
@@ -70,6 +75,31 @@ public class MovieDetails {
         private List<Cast> cast;
 
         public List<Cast> getCast() { return cast; }
+    }
+
+    public static class WatchProviders {
+        private Map<String, RegionProviders> results;
+
+        public Map<String, RegionProviders> getResults() { return results; }
+    }
+
+    public static class RegionProviders {
+        private String link;
+        private List<Provider> flatrate;
+        private List<Provider> rent;
+        private List<Provider> buy;
+
+        public String getLink() { return link; }
+        public List<Provider> getFlatrate() { return flatrate; }
+        public List<Provider> getRent() { return rent; }
+        public List<Provider> getBuy() { return buy; }
+    }
+
+    public static class Provider {
+        @SerializedName("provider_name")
+        private String name;
+
+        public String getName() { return name; }
     }
 
     public static class Cast {

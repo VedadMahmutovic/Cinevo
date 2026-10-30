@@ -1,11 +1,20 @@
 package com.vedad.cinevo.ui.details;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.view.ViewGroup;
+import android.webkit.WebChromeClient;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.widget.FrameLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -21,6 +30,7 @@ import com.vedad.cinevo.databinding.ActivityMovieDetailsBinding;
 import com.vedad.cinevo.model.Movie;
 import com.vedad.cinevo.model.MovieDetails;
 import com.vedad.cinevo.ui.home.MovieAdapter;
+import com.vedad.cinevo.util.AppSettings;
 import com.vedad.cinevo.util.GenreUtils;
 
 import java.util.ArrayList;
@@ -42,6 +52,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
     private boolean isFavorite = false;
     private boolean inWatchlist = false;
     private MovieAdapter similarAdapter;
+    private WebView trailerWebView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -111,7 +122,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
 
     private void loadDetails(int movieId) {
         RetrofitClient.getApi()
-                .getMovieDetails(movieId, BuildConfig.TMDB_API_KEY, "en-US", "videos,credits,recommendations")
+                .getMovieDetails(movieId, BuildConfig.TMDB_API_KEY, "en-US", "videos,credits,recommendations,watch/providers")
                 .enqueue(new Callback<MovieDetails>() {
                     @Override
                     public void onResponse(Call<MovieDetails> call, Response<MovieDetails> response) {
@@ -179,9 +190,8 @@ public class MovieDetailsActivity extends AppCompatActivity {
         String trailerKey = findTrailerKey(d);
         if (trailerKey != null) {
             binding.btnTrailer.setVisibility(android.view.View.VISIBLE);
-            binding.btnTrailer.setOnClickListener(v -> startActivity(new Intent(
-                    Intent.ACTION_VIEW,
-                    Uri.parse("https://www.youtube.com/watch?v=" + trailerKey))));
+            binding.btnTrailer.setOnClickListener(v -> toggleTrailer(trailerKey));
+            binding.btnTrailerExternal.setOnClickListener(v -> openTrailerExternally(trailerKey));
         }
 
         if (d.getRecommendations() != null && d.getRecommendations().getResults() != null) {
@@ -194,6 +204,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
                 binding.sectionSimilar.setVisibility(android.view.View.VISIBLE);
             }
         }
+        showWatchProviders(d);
     }
 
     private SavedMovie buildSavedMovie(String listType) {
@@ -235,5 +246,125 @@ public class MovieDetailsActivity extends AppCompatActivity {
             }
         }
         return null;
+    }
+
+    private void showWatchProviders(MovieDetails d) {
+        String region = new AppSettings(this).getWatchRegion();
+        binding.sectionWatch.setVisibility(android.view.View.VISIBLE);
+        binding.tvWatchRegion.setText("Država: " + region);
+
+        MovieDetails.RegionProviders providers = null;
+        if (d.getWatchProviders() != null && d.getWatchProviders().getResults() != null) {
+            providers = d.getWatchProviders().getResults().get(region);
+        }
+
+        boolean any = bindProviders(binding.tvWatchStream, "Streaming",
+                providers != null ? providers.getFlatrate() : null);
+        any |= bindProviders(binding.tvWatchRent, "Iznajmljivanje",
+                providers != null ? providers.getRent() : null);
+        any |= bindProviders(binding.tvWatchBuy, "Kupovina",
+                providers != null ? providers.getBuy() : null);
+
+        binding.tvWatchEmpty.setVisibility(any
+                ? android.view.View.GONE : android.view.View.VISIBLE);
+
+        if (providers != null && providers.getLink() != null) {
+            String link = providers.getLink();
+            binding.btnWatchLink.setVisibility(android.view.View.VISIBLE);
+            binding.btnWatchLink.setOnClickListener(v ->
+                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(link))));
+        } else {
+            binding.btnWatchLink.setVisibility(android.view.View.GONE);
+        }
+    }
+
+    private boolean bindProviders(TextView view, String label,
+                                  List<MovieDetails.Provider> providers) {
+        if (providers == null || providers.isEmpty()) {
+            view.setVisibility(android.view.View.GONE);
+            return false;
+        }
+        List<String> names = new ArrayList<>();
+        for (MovieDetails.Provider p : providers) {
+            names.add(p.getName());
+        }
+        view.setText(label + ": " + TextUtils.join(", ", names));
+        view.setVisibility(android.view.View.VISIBLE);
+        return true;
+    }
+
+    private void toggleTrailer(String videoKey) {
+        if (trailerWebView == null) {
+            showTrailer(videoKey);
+        } else {
+            hideTrailer();
+        }
+    }
+
+    @SuppressLint("SetJavaScriptEnabled")
+    private void showTrailer(String videoKey) {
+        if (!videoKey.matches("[A-Za-z0-9_-]+")) {
+            openTrailerExternally(videoKey);
+            return;
+        }
+
+        trailerWebView = new WebView(this);
+        trailerWebView.setBackgroundColor(Color.BLACK);
+
+        WebSettings settings = trailerWebView.getSettings();
+        settings.setJavaScriptEnabled(true);
+        settings.setDomStorageEnabled(true);
+        settings.setMediaPlaybackRequiresUserGesture(false);
+        trailerWebView.setWebChromeClient(new WebChromeClient());
+
+        int initialHeight = (int) (getResources().getDisplayMetrics().widthPixels * 9f / 16f);
+        binding.trailerContainer.addView(trailerWebView, new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, initialHeight));
+        binding.trailerContainer.setVisibility(android.view.View.VISIBLE);
+        binding.trailerContainer.post(() -> {
+            if (trailerWebView == null) return;
+            ViewGroup.LayoutParams params = trailerWebView.getLayoutParams();
+            params.height = binding.trailerContainer.getWidth() * 9 / 16;
+            trailerWebView.setLayoutParams(params);
+        });
+
+        binding.btnTrailer.setText("Sakrij trailer");
+        binding.btnTrailerExternal.setVisibility(android.view.View.VISIBLE);
+
+        String html = "<!DOCTYPE html><html><head>"
+                + "<meta name='viewport' content='width=device-width, initial-scale=1'>"
+                + "<style>html,body{margin:0;height:100%;background:#000}"
+                + "iframe{border:0;width:100%;height:100%}</style>"
+                + "</head><body>"
+                + "<iframe src='https://www.youtube.com/embed/" + videoKey + "?playsinline=1&rel=0' "
+                + "allow='autoplay; encrypted-media; picture-in-picture' allowfullscreen "
+                + "referrerpolicy='strict-origin-when-cross-origin'></iframe>"
+                + "</body></html>";
+
+        trailerWebView.loadDataWithBaseURL("https://" + getPackageName(), html,
+                "text/html", "utf-8", null);
+    }
+
+    private void hideTrailer() {
+        if (trailerWebView == null) return;
+        binding.trailerContainer.removeAllViews();
+        trailerWebView.loadUrl("about:blank");
+        trailerWebView.destroy();
+        trailerWebView = null;
+
+        binding.trailerContainer.setVisibility(android.view.View.GONE);
+        binding.btnTrailerExternal.setVisibility(android.view.View.GONE);
+        binding.btnTrailer.setText("Pogledaj trailer");
+    }
+
+    private void openTrailerExternally(String videoKey) {
+        startActivity(new Intent(Intent.ACTION_VIEW,
+                Uri.parse("https://www.youtube.com/watch?v=" + videoKey)));
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        hideTrailer();
     }
 }

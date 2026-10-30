@@ -10,4 +10,29 @@
         <item>light</item>
         <item>dark</item>
     </string-array>
+
+    <string-array name="region_entries">
+        <item>Bosna i Hercegovina</item>
+        <item>Hrvatska</item>
+        <item>Srbija</item>
+        <item>Slovenija</item>
+        <item>Crna Gora</item>
+        <item>Sjeverna Makedonija</item>
+        <item>Njemačka</item>
+        <item>Austrija</item>
+        <item>Ujedinjeno Kraljevstvo</item>
+        <item>SAD</item>
+    </string-array>
+    <string-array name="region_values">
+        <item>BA</item>
+        <item>HR</item>
+        <item>RS</item>
+        <item>SI</item>
+        <item>ME</item>
+        <item>MK</item>
+        <item>DE</item>
+        <item>AT</item>
+        <item>GB</item>
+        <item>US</item>
+    </string-array>
 </resources>

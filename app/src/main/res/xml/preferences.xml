@@ -41,6 +41,16 @@
             android:title="Obriši spremljene filmove" />
     </PreferenceCategory>
 
+    <PreferenceCategory android:title="Sadržaj">
+        <ListPreference
+            android:defaultValue="BA"
+            android:entries="@array/region_entries"
+            android:entryValues="@array/region_values"
+            android:key="pref_watch_region"
+            android:title="Država za dostupnost filmova"
+            app:useSimpleSummaryProvider="true" />
+    </PreferenceCategory>
+
     <PreferenceCategory android:title="Ostalo">
         <Preference
             android:key="pref_about"
