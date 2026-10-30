@@ -1,3 +1,4 @@
+
 package com.vedad.cinevo.ui.home;
 
 import android.content.Intent;
@@ -29,25 +30,32 @@ public class HomeFragment extends Fragment {
     private FragmentHomeBinding binding;
     private HomeViewModel viewModel;
     private MovieAdapter adapter;
+    private boolean isLoadingNow = false;
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
 
     @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view,
+                              @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        viewModel = new ViewModelProvider(requireActivity()).get(HomeViewModel.class);
+        viewModel = new ViewModelProvider(requireActivity())
+                .get(HomeViewModel.class);
+
         AppSettings settings = new AppSettings(requireContext());
 
         adapter = new MovieAdapter();
+
         GridLayoutManager layoutManager =
                 new GridLayoutManager(requireContext(), settings.getGridColumns());
+
         binding.recyclerMovies.setLayoutManager(layoutManager);
         binding.recyclerMovies.setAdapter(adapter);
 
@@ -55,8 +63,10 @@ public class HomeFragment extends Fragment {
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 if (dy <= 0) return;
+
                 int total = layoutManager.getItemCount();
                 int lastVisible = layoutManager.findLastVisibleItemPosition();
+
                 if (lastVisible >= total - LOAD_MORE_THRESHOLD) {
                     viewModel.loadNextPage();
                 }
@@ -69,22 +79,23 @@ public class HomeFragment extends Fragment {
             startActivity(intent);
         });
 
-        binding.searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                viewModel.setQuery(query);
-                binding.searchView.clearFocus();
-                return true;
-            }
+        binding.searchView.setOnQueryTextListener(
+                new SearchView.OnQueryTextListener() {
+                    @Override
+                    public boolean onQueryTextSubmit(String query) {
+                        viewModel.setQuery(query);
+                        binding.searchView.clearFocus();
+                        return true;
+                    }
 
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                if (newText.isEmpty()) {
-                    viewModel.setQuery("");
-                }
-                return true;
-            }
-        });
+                    @Override
+                    public boolean onQueryTextChange(String newText) {
+                        if (newText.isEmpty()) {
+                            viewModel.setQuery("");
+                        }
+                        return true;
+                    }
+                });
 
         binding.btnFilter.setOnClickListener(v -> openFilters());
 
@@ -99,31 +110,47 @@ public class HomeFragment extends Fragment {
 
         binding.btnSort.setOnClickListener(v -> {
             PopupMenu popup = new PopupMenu(requireContext(), binding.btnSort);
-            popup.getMenu().add(0, 1, 0, MovieFilter.sortLabel(MovieFilter.SORT_POPULARITY));
-            popup.getMenu().add(0, 2, 1, MovieFilter.sortLabel(MovieFilter.SORT_RATING));
-            popup.getMenu().add(0, 3, 2, MovieFilter.sortLabel(MovieFilter.SORT_DATE));
-            popup.getMenu().add(0, 4, 3, MovieFilter.sortLabel(MovieFilter.SORT_DATE_ASC));
+
+            popup.getMenu().add(0, 1, 0,
+                    MovieFilter.sortLabel(MovieFilter.SORT_POPULARITY));
+
+            popup.getMenu().add(0, 2, 1,
+                    MovieFilter.sortLabel(MovieFilter.SORT_RATING));
+
+            popup.getMenu().add(0, 3, 2,
+                    MovieFilter.sortLabel(MovieFilter.SORT_DATE));
+
+            popup.getMenu().add(0, 4, 3,
+                    MovieFilter.sortLabel(MovieFilter.SORT_DATE_ASC));
+
             popup.setOnMenuItemClickListener(item -> {
                 switch (item.getItemId()) {
                     case 2:
                         viewModel.setSort(MovieFilter.SORT_RATING);
                         break;
+
                     case 3:
                         viewModel.setSort(MovieFilter.SORT_DATE);
                         break;
+
                     case 4:
                         viewModel.setSort(MovieFilter.SORT_DATE_ASC);
                         break;
+
                     default:
                         viewModel.setSort(MovieFilter.SORT_POPULARITY);
                 }
+
                 return true;
             });
+
             popup.show();
         });
 
         binding.chipActiveFilters.setOnClickListener(v -> openFilters());
-        binding.chipActiveFilters.setOnCloseIconClickListener(v -> viewModel.clearFilters());
+
+        binding.chipActiveFilters.setOnCloseIconClickListener(
+                v -> viewModel.clearFilters());
 
         viewModel.getQueryLive().observe(getViewLifecycleOwner(), text -> {
             if (!binding.searchView.getQuery().toString().equals(text)) {
@@ -132,7 +159,9 @@ public class HomeFragment extends Fragment {
         });
 
         viewModel.getFilterLive().observe(getViewLifecycleOwner(), f -> {
-            binding.btnSort.setText("Sortiraj: " + MovieFilter.sortLabel(f.sortBy) + " ▾");
+            binding.btnSort.setText(
+                    "Sortiraj: " + MovieFilter.sortLabel(f.sortBy) + " ▾");
+
             if (f.hasFilters()) {
                 binding.chipActiveFilters.setText("Filteri: " + f.describe());
                 binding.chipActiveFilters.setVisibility(View.VISIBLE);
@@ -141,10 +170,31 @@ public class HomeFragment extends Fragment {
             }
         });
 
-        viewModel.getMovies().observe(getViewLifecycleOwner(), movies -> adapter.setMovies(movies));
+        viewModel.getMovies().observe(getViewLifecycleOwner(), movies -> {
+            adapter.setMovies(movies);
+            renderLoading();
+        });
 
-        viewModel.getLoading().observe(getViewLifecycleOwner(), loading ->
-                binding.progressPage.setVisibility(loading ? View.VISIBLE : View.GONE));
+        viewModel.getLoading().observe(getViewLifecycleOwner(), loading -> {
+            isLoadingNow = loading;
+            renderLoading();
+        });
+
+        viewModel.getStateMessage().observe(getViewLifecycleOwner(), state -> {
+            if (state == null) {
+                binding.stateView.setVisibility(View.GONE);
+                return;
+            }
+
+            binding.tvState.setText(state.text);
+
+            binding.btnRetry.setVisibility(
+                    state.retryable ? View.VISIBLE : View.GONE);
+
+            binding.stateView.setVisibility(View.VISIBLE);
+        });
+
+        binding.btnRetry.setOnClickListener(v -> viewModel.retry());
 
         viewModel.getMessage().observe(getViewLifecycleOwner(), text -> {
             if (text != null) {
@@ -157,7 +207,19 @@ public class HomeFragment extends Fragment {
     }
 
     private void openFilters() {
-        new FilterBottomSheet().show(getParentFragmentManager(), "filters");
+        new FilterBottomSheet().show(
+                getParentFragmentManager(),
+                "filters");
+    }
+
+    private void renderLoading() {
+        boolean empty = adapter.getItemCount() == 0;
+
+        binding.progressCenter.setVisibility(
+                isLoadingNow && empty ? View.VISIBLE : View.GONE);
+
+        binding.progressPage.setVisibility(
+                isLoadingNow && !empty ? View.VISIBLE : View.GONE);
     }
 
     @Override

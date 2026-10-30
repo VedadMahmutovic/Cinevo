@@ -116,30 +116,53 @@ public class MovieDetailsActivity extends AppCompatActivity {
                 viewModel.remove(currentDetails.getId(), SavedMovie.WATCHED);
             }
         });
+        binding.btnDetailsRetry.setOnClickListener(v -> loadDetails(movieId));
 
         loadDetails(movieId);
     }
 
     private void loadDetails(int movieId) {
+        showLoading();
         RetrofitClient.getApi()
-                .getMovieDetails(movieId, BuildConfig.TMDB_API_KEY, "en-US", "videos,credits,recommendations,watch/providers")
+                .getMovieDetails(movieId, BuildConfig.TMDB_API_KEY, "en-US",
+                        "videos,credits,recommendations,watch/providers")
                 .enqueue(new Callback<MovieDetails>() {
                     @Override
                     public void onResponse(Call<MovieDetails> call, Response<MovieDetails> response) {
+                        if (isFinishing() || isDestroyed()) return;
                         if (response.isSuccessful() && response.body() != null) {
+                            showContent();
                             showDetails(response.body());
                         } else {
-                            Toast.makeText(MovieDetailsActivity.this,
-                                    "Greška: " + response.code(), Toast.LENGTH_SHORT).show();
+                            showError("Greška pri učitavanju filma (" + response.code() + ")");
                         }
                     }
 
                     @Override
                     public void onFailure(Call<MovieDetails> call, Throwable t) {
-                        Toast.makeText(MovieDetailsActivity.this,
-                                "Nema veze s internetom", Toast.LENGTH_SHORT).show();
+                        if (isFinishing() || isDestroyed()) return;
+                        showError("Nema veze s internetom");
                     }
                 });
+    }
+
+    private void showLoading() {
+        binding.progressDetails.setVisibility(android.view.View.VISIBLE);
+        binding.stateViewDetails.setVisibility(android.view.View.GONE);
+        binding.scrollContent.setVisibility(android.view.View.INVISIBLE);
+    }
+
+    private void showContent() {
+        binding.progressDetails.setVisibility(android.view.View.GONE);
+        binding.stateViewDetails.setVisibility(android.view.View.GONE);
+        binding.scrollContent.setVisibility(android.view.View.VISIBLE);
+    }
+
+    private void showError(String message) {
+        binding.progressDetails.setVisibility(android.view.View.GONE);
+        binding.tvDetailsState.setText(message);
+        binding.stateViewDetails.setVisibility(android.view.View.VISIBLE);
+        binding.scrollContent.setVisibility(android.view.View.INVISIBLE);
     }
 
     private void showDetails(MovieDetails d) {

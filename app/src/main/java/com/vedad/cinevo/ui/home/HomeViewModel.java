@@ -22,6 +22,16 @@ import retrofit2.Response;
 
 public class HomeViewModel extends ViewModel {
 
+    public static class StateMessage {
+        public final String text;
+        public final boolean retryable;
+
+        public StateMessage(String text, boolean retryable) {
+            this.text = text;
+            this.retryable = retryable;
+        }
+    }
+
     private static final String LANGUAGE = "en-US";
     private static final int TMDB_MAX_PAGES = 500;
 
@@ -30,6 +40,7 @@ public class HomeViewModel extends ViewModel {
     private final MutableLiveData<List<Movie>> movies = new MutableLiveData<>(new ArrayList<>());
     private final MutableLiveData<Boolean> loading = new MutableLiveData<>(false);
     private final MutableLiveData<String> message = new MutableLiveData<>();
+    private final MutableLiveData<StateMessage> stateMessage = new MutableLiveData<>();
     private final MutableLiveData<String> queryLive = new MutableLiveData<>("");
     private final MutableLiveData<MovieFilter> filterLive = new MutableLiveData<>(new MovieFilter());
 
@@ -46,6 +57,7 @@ public class HomeViewModel extends ViewModel {
     public LiveData<List<Movie>> getMovies() { return movies; }
     public LiveData<Boolean> getLoading() { return loading; }
     public LiveData<String> getMessage() { return message; }
+    public LiveData<StateMessage> getStateMessage() { return stateMessage; }
     public LiveData<String> getQueryLive() { return queryLive; }
     public LiveData<MovieFilter> getFilterLive() { return filterLive; }
 
@@ -61,6 +73,10 @@ public class HomeViewModel extends ViewModel {
         if (page == 0 && !isLoading) {
             loadNextPage();
         }
+    }
+    public void retry() {
+        stateMessage.setValue(null);
+        loadNextPage();
     }
 
     public void setQuery(String newQuery) {
@@ -99,6 +115,7 @@ public class HomeViewModel extends ViewModel {
         allMovies.clear();
         seenIds.clear();
         movies.setValue(new ArrayList<>());
+        stateMessage.setValue(null);
         page = 0;
         totalPages = 1;
         isLoading = false;
@@ -148,15 +165,15 @@ public class HomeViewModel extends ViewModel {
                     }
                     movies.setValue(new ArrayList<>(allMovies));
 
-                    if (allMovies.isEmpty()) {
-                        if (!query.isEmpty()) {
-                            message.setValue("Nema rezultata za: " + query);
-                        } else if (filter.isActive()) {
-                            message.setValue("Nema filmova za odabrane filtere");
-                        }
+                    if (!allMovies.isEmpty()) {
+                        stateMessage.setValue(null);
+                    } else if (!query.isEmpty()) {
+                        stateMessage.setValue(new StateMessage("Nema rezultata za: " + query, false));
+                    } else if (filter.isActive()) {
+                        stateMessage.setValue(new StateMessage("Nema filmova za odabrane filtere", false));
                     }
                 } else {
-                    message.setValue("Greška: " + response.code());
+                    reportError("Greška pri učitavanju (" + response.code() + ")");
                 }
             }
 
@@ -165,9 +182,16 @@ public class HomeViewModel extends ViewModel {
                 if (call.isCanceled()) return;
                 isLoading = false;
                 loading.setValue(false);
-                message.setValue("Nema veze s internetom");
+                reportError("Nema veze s internetom");
             }
         });
+    }
+    private void reportError(String text) {
+        if (allMovies.isEmpty()) {
+            stateMessage.setValue(new StateMessage(text, true));
+        } else {
+            message.setValue(text);
+        }
     }
 
     @Override
