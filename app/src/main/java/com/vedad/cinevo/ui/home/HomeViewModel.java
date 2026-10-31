@@ -1,5 +1,7 @@
 package com.vedad.cinevo.ui.home;
 
+import android.os.Parcelable;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -36,6 +38,9 @@ public class HomeViewModel extends ViewModel {
     private static final int TMDB_MAX_PAGES = 500;
 
     private final TmdbApi api = RetrofitClient.getApi();
+    private Parcelable listState;
+    public Parcelable getListState() { return listState; }
+    public void setListState(Parcelable state) { this.listState = state; }
 
     private final MutableLiveData<List<Movie>> movies = new MutableLiveData<>(new ArrayList<>());
     private final MutableLiveData<Boolean> loading = new MutableLiveData<>(false);

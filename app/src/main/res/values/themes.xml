@@ -1,9 +1,43 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Base.Theme.Cinevo" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.Cinevo" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/cinevo_primary</item>
+        <item name="colorOnPrimary">@color/cinevo_on_primary</item>
+        <item name="colorPrimaryContainer">@color/cinevo_primary_container</item>
+        <item name="colorOnPrimaryContainer">@color/cinevo_on_primary_container</item>
+
+        <item name="colorSecondary">@color/cinevo_secondary</item>
+        <item name="colorOnSecondary">@color/cinevo_on_secondary</item>
+        <item name="colorSecondaryContainer">@color/cinevo_secondary_container</item>
+        <item name="colorOnSecondaryContainer">@color/cinevo_on_secondary_container</item>
+
+        <item name="android:colorBackground">@color/cinevo_background</item>
+        <item name="colorOnBackground">@color/cinevo_on_background</item>
+        <item name="colorSurface">@color/cinevo_surface</item>
+        <item name="colorOnSurface">@color/cinevo_on_surface</item>
+        <item name="colorSurfaceVariant">@color/cinevo_surface_variant</item>
+        <item name="colorOnSurfaceVariant">@color/cinevo_on_surface_variant</item>
+        <item name="colorOutline">@color/cinevo_outline</item>
+
+        <item name="shapeAppearanceSmallComponent">@style/ShapeAppearance.Cinevo.Small</item>
+        <item name="shapeAppearanceMediumComponent">@style/ShapeAppearance.Cinevo.Medium</item>
+        <item name="shapeAppearanceLargeComponent">@style/ShapeAppearance.Cinevo.Large</item>
     </style>
 
-    <style name="Theme.Cinevo" parent="Base.Theme.Cinevo" />
+    <style name="ShapeAppearance.Cinevo.Small" parent="ShapeAppearance.Material3.SmallComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">12dp</item>
+    </style>
+
+    <style name="ShapeAppearance.Cinevo.Medium" parent="ShapeAppearance.Material3.MediumComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">16dp</item>
+    </style>
+
+    <style name="ShapeAppearance.Cinevo.Large" parent="ShapeAppearance.Material3.LargeComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">24dp</item>
+    </style>
+
 </resources>

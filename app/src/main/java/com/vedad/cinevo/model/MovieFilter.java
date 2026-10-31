@@ -121,4 +121,20 @@ public class MovieFilter {
         }
         return sb.toString();
     }
+
+    public int activeCount() {
+        int n = 0;
+        if (!genreIds.isEmpty()) n++;
+        if (yearFrom != null || yearTo != null) n++;
+        if (minRating > 0f) n++;
+        if (runtimeMin != null || runtimeMax != null) n++;
+        return n;
+    }
+
+    public static String sortShortLabel(String sortBy) {
+        if (SORT_RATING.equals(sortBy)) return "Ocjena";
+        if (SORT_DATE.equals(sortBy)) return "Najnovije";
+        if (SORT_DATE_ASC.equals(sortBy)) return "Najstarije";
+        return "Popularno";
+    }
 }

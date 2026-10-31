@@ -9,33 +9,74 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="12dp"
         android:gravity="center_vertical"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:paddingStart="16dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="8dp">
 
-        <androidx.appcompat.widget.SearchView
-            android:id="@+id/searchView"
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="52dp"
             android:layout_weight="1"
-            app:iconifiedByDefault="false"
-            app:queryHint="Pretraži filmove..." />
+            app:cardBackgroundColor="?attr/colorSurfaceVariant"
+            app:cardCornerRadius="26dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp">
 
-        <ImageButton
-            android:id="@+id/btnFilter"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Filteri"
-            android:src="@drawable/ic_filter" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="16dp"
+                android:paddingEnd="4dp">
+
+                <ImageView
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:contentDescription="Pretraga"
+                    android:src="@drawable/ic_search"
+                    app:tint="?attr/colorOnSurfaceVariant" />
+
+                <EditText
+                    android:id="@+id/editSearch"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@null"
+                    android:hint="Pretraži filmove"
+                    android:imeOptions="actionSearch"
+                    android:importantForAutofill="no"
+                    android:inputType="text"
+                    android:maxLines="1"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="8dp"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textColorHint="?attr/colorOnSurfaceVariant"
+                    android:textSize="16sp" />
+
+                <ImageButton
+                    android:id="@+id/btnClearSearch"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="Obriši tekst"
+                    android:src="@drawable/ic_close"
+                    android:visibility="gone"
+                    app:tint="?attr/colorOnSurfaceVariant" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
         <ImageButton
             android:id="@+id/btnSettings"
             android:layout_width="48dp"
             android:layout_height="48dp"
+            android:layout_marginStart="4dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="Postavke"
-            android:src="@drawable/ic_settings" />
+            android:src="@drawable/ic_settings"
+            app:tint="?attr/colorOnSurface" />
     </LinearLayout>
 
     <LinearLayout
@@ -43,17 +84,32 @@
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:paddingStart="12dp"
-        android:paddingEnd="12dp">
+        android:paddingStart="16dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="8dp"
+        android:paddingBottom="4dp">
 
-        <Button
-            android:id="@+id/btnSort"
-            style="?attr/borderlessButtonStyle"
-            android:layout_width="0dp"
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chipFilters"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="start|center_vertical"
-            android:text="Sortiraj: Popularnost ▾" />
+            android:text="Filteri"
+            app:chipIcon="@drawable/ic_filter"
+            app:chipIconVisible="true"
+            app:chipMinHeight="44dp" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chipSort"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="Popularno ▾"
+            app:chipMinHeight="44dp" />
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
 
         <ImageButton
             android:id="@+id/btnGrid"
@@ -61,21 +117,9 @@
             android:layout_height="48dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="Broj kolona"
-            android:src="@drawable/ic_grid" />
+            android:src="@drawable/ic_grid"
+            app:tint="?attr/colorOnSurface" />
     </LinearLayout>
-
-    <com.google.android.material.chip.Chip
-        android:id="@+id/chipActiveFilters"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
-        android:layout_marginEnd="12dp"
-        android:ellipsize="end"
-        android:maxLines="1"
-        android:textSize="13sp"
-        android:visibility="gone"
-        app:chipMinHeight="48dp"
-        app:closeIconVisible="true" />
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -119,6 +163,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"
+                android:textColor="?attr/colorOnSurfaceVariant"
                 android:textSize="16sp" />
 
             <Button

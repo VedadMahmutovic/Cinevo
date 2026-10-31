@@ -52,14 +52,22 @@ public class RecommendationsFragment extends Fragment {
 
         viewModel.getRecommendations().observe(getViewLifecycleOwner(), movies -> {
             adapter.setMovies(movies);
+            binding.tvMessage.setText(
+                    "Još nema preporuka. Dodaj nekoliko filmova u favorite ili na listu za gledanje.");
             binding.tvMessage.setVisibility(movies.isEmpty() ? View.VISIBLE : View.GONE);
         });
 
-        viewModel.getLoading().observe(getViewLifecycleOwner(), loading ->
-                binding.progress.setVisibility(loading ? View.VISIBLE : View.GONE));
+        viewModel.getLoading().observe(getViewLifecycleOwner(), loading -> {
+            binding.progress.setVisibility(loading ? View.VISIBLE : View.GONE);
+            if (loading) binding.tvMessage.setVisibility(View.GONE);
+        });
 
         viewModel.getError().observe(getViewLifecycleOwner(), message -> {
-            if (message != null) {
+            if (message == null) return;
+            if (adapter.getItemCount() == 0) {
+                binding.tvMessage.setText(message + ". Dodirni Osvježi da pokušaš ponovo.");
+                binding.tvMessage.setVisibility(View.VISIBLE);
+            } else {
                 Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
             }
         });

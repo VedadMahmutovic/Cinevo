@@ -100,6 +100,11 @@ public class MovieDetails {
         private String name;
 
         public String getName() { return name; }
+
+        @SerializedName("logo_path")
+        private String logoPath;
+
+        public String getLogoPath() { return logoPath; }
     }
 
     public static class Cast {

@@ -8,12 +8,18 @@ import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.vedad.cinevo.R;
+import com.vedad.cinevo.data.repository.RuntimeRepository;
 import com.vedad.cinevo.databinding.ItemMovieBinding;
 import com.vedad.cinevo.model.Movie;
+import com.vedad.cinevo.model.MovieDetails;
+import com.vedad.cinevo.util.RuntimeFormatter;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+
+import retrofit2.Call;
 
 public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHolder> {
 
@@ -78,12 +84,37 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
         Movie movie = movies.get(position);
 
         holder.binding.tvTitle.setText(movie.getTitle());
+
+        String date = movie.getReleaseDate();
+        final String year = date != null && date.length() >= 4 ? date.substring(0, 4) : "";
+
+        holder.boundMovieId = movie.getId();
+        if (holder.runtimeCall != null) {
+            holder.runtimeCall.cancel();
+            holder.runtimeCall = null;
+        }
+
+        Integer cached = RuntimeRepository.getCached(movie.getId());
+        if (cached != null) {
+            holder.binding.tvYear.setText(yearWithRuntime(year, cached));
+        } else {
+            holder.binding.tvYear.setText(year);
+            holder.runtimeCall = RuntimeRepository.fetch(movie.getId(), minutes -> {
+                if (holder.boundMovieId == movie.getId()) {
+                    holder.binding.tvYear.setText(yearWithRuntime(year, minutes));
+                }
+            });
+        }
+
         if (movie.getUserRating() > 0) {
             holder.binding.tvRating.setText(
-                    String.format(Locale.US, "Tvoja ocjena: ★ %d/5", movie.getUserRating()));
+                    String.format(Locale.US, "★ %d/5", movie.getUserRating()));
+            holder.binding.tvRating.setBackgroundResource(R.drawable.bg_badge_primary);
         } else {
-            holder.binding.tvRating.setText(
-                    String.format(Locale.US, "★ %.1f", movie.getVoteAverage()));
+            holder.binding.tvRating.setText(movie.getVoteAverage() > 0
+                    ? String.format(Locale.US, "★ %.1f", movie.getVoteAverage())
+                    : "Novo");
+            holder.binding.tvRating.setBackgroundResource(R.drawable.bg_badge_dark);
         }
 
         String url = movie.getPosterPath() != null
@@ -107,6 +138,8 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
 
     static class MovieViewHolder extends RecyclerView.ViewHolder {
         final ItemMovieBinding binding;
+        int boundMovieId = -1;
+        Call<MovieDetails> runtimeCall;
 
         MovieViewHolder(ItemMovieBinding binding) {
             super(binding.getRoot());
@@ -118,5 +151,18 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
 
     public void setFixedItemWidth(int widthPx) {
         this.fixedItemWidth = widthPx;
+    }
+
+    private static String yearWithRuntime(String year, int minutes) {
+        String runtime = RuntimeFormatter.format(minutes);
+        return year.isEmpty() ? runtime : year + " · " + runtime;
+    }
+
+    @Override
+    public void onViewRecycled(@NonNull MovieViewHolder holder) {
+        if (holder.runtimeCall != null) {
+            holder.runtimeCall.cancel();
+            holder.runtimeCall = null;
+        }
     }
 }

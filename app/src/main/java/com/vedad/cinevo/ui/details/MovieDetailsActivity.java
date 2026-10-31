@@ -12,20 +12,22 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.FrameLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import androidx.annotation.NonNull;
+import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.google.android.material.chip.Chip;
 import com.vedad.cinevo.BuildConfig;
 import com.vedad.cinevo.data.local.SavedMovie;
 import com.vedad.cinevo.data.remote.RetrofitClient;
+import com.vedad.cinevo.data.repository.RuntimeRepository;
 import com.vedad.cinevo.databinding.ActivityMovieDetailsBinding;
 import com.vedad.cinevo.model.Movie;
 import com.vedad.cinevo.model.MovieDetails;
@@ -45,6 +47,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
 
     public static final String EXTRA_MOVIE_ID = "movie_id";
     private static final String BACKDROP_BASE_URL = "https://image.tmdb.org/t/p/w780";
+    private static final String POSTER_BASE_URL = "https://image.tmdb.org/t/p/w342";
 
     private ActivityMovieDetailsBinding binding;
     private MovieDetailsViewModel viewModel;
@@ -53,18 +56,36 @@ public class MovieDetailsActivity extends AppCompatActivity {
     private boolean inWatchlist = false;
     private MovieAdapter similarAdapter;
     private WebView trailerWebView;
+    private ProviderAdapter streamAdapter;
+    private ProviderAdapter rentAdapter;
+    private ProviderAdapter buyAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
         binding = ActivityMovieDetailsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), (v, insets) -> {
             Insets bars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(0, 0, 0, bars.bottom);
+
+            ViewGroup.MarginLayoutParams params =
+                    (ViewGroup.MarginLayoutParams) binding.btnBack.getLayoutParams();
+            params.topMargin = bars.top + (int) (8 * getResources().getDisplayMetrics().density);
+            binding.btnBack.setLayoutParams(params);
             return insets;
         });
+
+        binding.btnBack.setOnClickListener(v -> finish());
+
+        streamAdapter = new ProviderAdapter();
+        rentAdapter = new ProviderAdapter();
+        buyAdapter = new ProviderAdapter();
+        setupProviderList(binding.recyclerStream, streamAdapter);
+        setupProviderList(binding.recyclerRent, rentAdapter);
+        setupProviderList(binding.recyclerBuy, buyAdapter);
 
         int movieId = getIntent().getIntExtra(EXTRA_MOVIE_ID, -1);
         if (movieId == -1) {
@@ -167,6 +188,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
 
     private void showDetails(MovieDetails d) {
         currentDetails = d;
+        RuntimeRepository.put(d.getId(), d.getRuntime());
         binding.sectionRating.setVisibility(android.view.View.VISIBLE);
         binding.tvTitle.setText(d.getTitle());
 
@@ -185,12 +207,19 @@ public class MovieDetailsActivity extends AppCompatActivity {
         }
         binding.tvInfo.setText(TextUtils.join("  •  ", info));
 
+        binding.chipGroupGenres.removeAllViews();
         if (d.getGenres() != null) {
-            List<String> genres = new ArrayList<>();
             for (MovieDetails.Genre g : d.getGenres()) {
-                genres.add(g.getName());
+                Chip chip = new Chip(this);
+                chip.setText(g.getName());
+                chip.setClickable(false);
+                chip.setCheckable(false);
+                binding.chipGroupGenres.addView(chip);
             }
-            binding.tvGenres.setText(TextUtils.join(", ", genres));
+        }
+
+        if (d.getPosterPath() != null) {
+            Glide.with(this).load(POSTER_BASE_URL + d.getPosterPath()).into(binding.imgPoster);
         }
 
         binding.tvOverview.setText(TextUtils.isEmpty(d.getOverview())
@@ -281,11 +310,11 @@ public class MovieDetailsActivity extends AppCompatActivity {
             providers = d.getWatchProviders().getResults().get(region);
         }
 
-        boolean any = bindProviders(binding.tvWatchStream, "Streaming",
+        boolean any = bindGroup(binding.groupStream, streamAdapter,
                 providers != null ? providers.getFlatrate() : null);
-        any |= bindProviders(binding.tvWatchRent, "Iznajmljivanje",
+        any |= bindGroup(binding.groupRent, rentAdapter,
                 providers != null ? providers.getRent() : null);
-        any |= bindProviders(binding.tvWatchBuy, "Kupovina",
+        any |= bindGroup(binding.groupBuy, buyAdapter,
                 providers != null ? providers.getBuy() : null);
 
         binding.tvWatchEmpty.setVisibility(any
@@ -301,21 +330,16 @@ public class MovieDetailsActivity extends AppCompatActivity {
         }
     }
 
-    private boolean bindProviders(TextView view, String label,
-                                  List<MovieDetails.Provider> providers) {
-        if (providers == null || providers.isEmpty()) {
-            view.setVisibility(android.view.View.GONE);
+    private boolean bindGroup(android.view.View group, ProviderAdapter adapter,
+                              List<MovieDetails.Provider> list) {
+        if (list == null || list.isEmpty()) {
+            group.setVisibility(android.view.View.GONE);
             return false;
         }
-        List<String> names = new ArrayList<>();
-        for (MovieDetails.Provider p : providers) {
-            names.add(p.getName());
-        }
-        view.setText(label + ": " + TextUtils.join(", ", names));
-        view.setVisibility(android.view.View.VISIBLE);
+        adapter.setProviders(list);
+        group.setVisibility(android.view.View.VISIBLE);
         return true;
     }
-
     private void toggleTrailer(String videoKey) {
         if (trailerWebView == null) {
             showTrailer(videoKey);
@@ -389,5 +413,11 @@ public class MovieDetailsActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
         hideTrailer();
+    }
+
+    private void setupProviderList(RecyclerView list, ProviderAdapter adapter) {
+        list.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        list.setAdapter(adapter);
+        list.setNestedScrollingEnabled(false);
     }
 }
