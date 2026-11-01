@@ -57,6 +57,12 @@ public class RecommendationEngineTest {
         return s;
     }
 
+    private SavedMovie watched(int id, double stars, String genres) {
+        SavedMovie s = saved(id, SavedMovie.WATCHED, genres);
+        s.userRating = (int) Math.round(stars * 2);
+        return s;
+    }
+
     @Test
     public void buildProfile_favoriteCountsMoreThanWatchlist() {
         List<SavedMovie> saved = Arrays.asList(
@@ -246,5 +252,13 @@ public class RecommendationEngineTest {
                 new HashMap<Integer, Integer>(), new HashSet<Integer>(), 10);
 
         assertEquals(2, ranked.get(0).movie.getId());
+    }
+
+    @Test
+    public void buildProfile_halfStarRatingMapsLinearly() {
+        Map<Integer, Double> profile = RecommendationEngine.buildProfile(
+                Arrays.asList(watched(1, 4.5, "12")));
+
+        assertEquals(0.75, profile.get(12), DELTA);
     }
 }

@@ -13,6 +13,7 @@ import com.vedad.cinevo.data.repository.RuntimeRepository;
 import com.vedad.cinevo.databinding.ItemMovieBinding;
 import com.vedad.cinevo.model.Movie;
 import com.vedad.cinevo.model.MovieDetails;
+import com.vedad.cinevo.util.RatingFormatter;
 import com.vedad.cinevo.util.RuntimeFormatter;
 
 import java.util.ArrayList;
@@ -108,7 +109,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
 
         if (movie.getUserRating() > 0) {
             holder.binding.tvRating.setText(
-                    String.format(Locale.US, "★ %d/5", movie.getUserRating()));
+                    "★ " + RatingFormatter.stars(movie.getUserRating()) + "/5");
             holder.binding.tvRating.setBackgroundResource(R.drawable.bg_badge_primary);
         } else {
             holder.binding.tvRating.setText(movie.getVoteAverage() > 0
@@ -164,5 +165,11 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
             holder.runtimeCall.cancel();
             holder.runtimeCall = null;
         }
+    }
+
+    public void setMoviesInstant(List<Movie> newMovies) {
+        movies.clear();
+        movies.addAll(newMovies);
+        notifyDataSetChanged();
     }
 }

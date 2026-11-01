@@ -33,6 +33,8 @@ public class SavedFragment extends Fragment {
     private SavedViewModel viewModel;
     private MovieAdapter adapter;
 
+    private boolean awaitingTabData = false;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -51,6 +53,7 @@ public class SavedFragment extends Fragment {
         binding.recyclerSaved.setLayoutManager(new GridLayoutManager(
                 requireContext(), new AppSettings(requireContext()).getGridColumns()));
         binding.recyclerSaved.setAdapter(adapter);
+        binding.recyclerSaved.setItemAnimator(null);
 
         adapter.setOnMovieClickListener(movie -> {
             Intent intent = new Intent(requireContext(), MovieDetailsActivity.class);
@@ -68,7 +71,13 @@ public class SavedFragment extends Fragment {
         binding.tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                viewModel.selectType(TYPES[tab.getPosition()]);
+                String type = TYPES[tab.getPosition()];
+                if (!type.equals(viewModel.getSelectedType())) {
+                    awaitingTabData = true;
+                    binding.listContainer.animate().cancel();
+                    binding.listContainer.animate().alpha(0f).setDuration(80).start();
+                }
+                viewModel.selectType(type);
             }
 
             @Override
@@ -86,10 +95,21 @@ public class SavedFragment extends Fragment {
                 m.setUserRating(s.userRating);
                 movies.add(m);
             }
-            adapter.setMovies(movies);
+
+            if (awaitingTabData) {
+                adapter.setMoviesInstant(movies);
+                binding.recyclerSaved.scrollToPosition(0);
+            } else {
+                adapter.setMovies(movies);
+            }
 
             binding.tvEmpty.setText(emptyMessage(viewModel.getSelectedType()));
-            binding.tvEmpty.setVisibility(movies.isEmpty() ? View.VISIBLE : View.GONE);
+            binding.emptyView.setVisibility(movies.isEmpty() ? View.VISIBLE : View.GONE);
+
+            if (awaitingTabData) {
+                awaitingTabData = false;
+                binding.listContainer.animate().alpha(1f).setDuration(160).start();
+            }
         });
     }
 

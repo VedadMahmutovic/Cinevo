@@ -19,6 +19,7 @@ public class SettingsActivity extends AppCompatActivity {
 
         ActivitySettingsBinding binding = ActivitySettingsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        binding.btnSettingsBack.setOnClickListener(v -> finish());
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.settingsRoot, (v, insets) -> {
             Insets bars = insets.getInsets(WindowInsetsCompat.Type.systemBars());

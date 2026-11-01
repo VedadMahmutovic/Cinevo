@@ -26,6 +26,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.color.MaterialColors;
+import com.vedad.cinevo.R;
 import com.vedad.cinevo.databinding.FragmentHomeBinding;
 import com.vedad.cinevo.model.MovieFilter;
 import com.vedad.cinevo.ui.details.MovieDetailsActivity;
@@ -157,10 +158,19 @@ public class HomeFragment extends Fragment {
         binding.btnSettings.setOnClickListener(v ->
                 startActivity(new Intent(requireContext(), SettingsActivity.class)));
 
+        binding.btnGrid.setImageResource(
+                settings.getGridColumns() == 3 ? R.drawable.ic_grid_3 : R.drawable.ic_grid);
+
         binding.btnGrid.setOnClickListener(v -> {
             int next = layoutManager.getSpanCount() == 2 ? 3 : 2;
             layoutManager.setSpanCount(next);
             settings.setGridColumns(next);
+
+            animateGridIcon(next == 3);
+
+            binding.recyclerMovies.animate().cancel();
+            binding.recyclerMovies.setAlpha(0.4f);
+            binding.recyclerMovies.animate().alpha(1f).setDuration(220).start();
         });
 
         binding.chipFilters.setOnClickListener(v -> openFilters());
@@ -267,5 +277,23 @@ public class HomeFragment extends Fragment {
             viewModel.setListState(layoutManager.onSaveInstanceState());
         }
         binding = null;
+    }
+
+    private void animateGridIcon(boolean threeColumns) {
+        binding.btnGrid.animate().cancel();
+        binding.btnGrid.animate()
+                .scaleX(0f).scaleY(0f).rotation(90f)
+                .setDuration(110)
+                .withEndAction(() -> {
+                    if (binding == null) return;
+                    binding.btnGrid.setImageResource(
+                            threeColumns ? R.drawable.ic_grid_3 : R.drawable.ic_grid);
+                    binding.btnGrid.setRotation(-90f);
+                    binding.btnGrid.animate()
+                            .scaleX(1f).scaleY(1f).rotation(0f)
+                            .setDuration(150)
+                            .start();
+                })
+                .start();
     }
 }

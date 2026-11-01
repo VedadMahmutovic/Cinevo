@@ -8,10 +8,11 @@
     <color name="cinevo_primary_container">#E6DEFF</color>
     <color name="cinevo_on_primary_container">#1E0A66</color>
 
-    <color name="cinevo_secondary">#FFB703</color>
-    <color name="cinevo_on_secondary">#2B1D00</color>
-    <color name="cinevo_secondary_container">#FFE7A8</color>
-    <color name="cinevo_on_secondary_container">#2B1D00</color>
+    <color name="cinevo_secondary">#5F5B7A</color>
+    <color name="cinevo_on_secondary">#FFFFFF</color>
+    <color name="cinevo_secondary_container">#E4E0F5</color>
+    <color name="cinevo_on_secondary_container">#1B1830</color>
+    <color name="cinevo_star">#FFB703</color>
 
     <color name="cinevo_background">#F6F6FB</color>
     <color name="cinevo_on_background">#1A1B22</color>
@@ -24,4 +25,8 @@
     <color name="cinevo_badge_dark">#B3000000</color>
 
     <color name="cinevo_background_transparent">#00F6F6FB</color>
+
+    <color name="cinevo_badge_user">#5B3FE0</color>
+    <color name="cinevo_icon_accent">#8B75FF</color>
+    <color name="cinevo_nav_background">#E9E7F2</color>
 </resources>

@@ -76,7 +76,7 @@ public class RecommendationRepository {
         for (SavedMovie s : saved) {
             excludeIds.add(s.id);
             boolean positiveSeed = SavedMovie.FAVORITE.equals(s.listType)
-                    || (SavedMovie.WATCHED.equals(s.listType) && s.userRating >= 4);
+                    || (SavedMovie.WATCHED.equals(s.listType) && s.userRating >= 8);
             if (positiveSeed && used < MAX_FAVORITES_FOR_B && seededIds.add(s.id)) {
                 used++;
                 Response<MovieResponse> response = api.getRecommendations(

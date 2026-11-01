@@ -73,8 +73,10 @@ public class MovieDetails {
 
     public static class Credits {
         private List<Cast> cast;
+        private List<Crew> crew;
 
         public List<Cast> getCast() { return cast; }
+        public List<Crew> getCrew() { return crew; }
     }
 
     public static class WatchProviders {
@@ -111,6 +113,14 @@ public class MovieDetails {
         private String name;
 
         public String getName() { return name; }
+    }
+
+    public static class Crew {
+        private String name;
+        private String job;
+
+        public String getName() { return name; }
+        public String getJob() { return job; }
     }
 
     public static class Recommendations {

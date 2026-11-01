@@ -25,6 +25,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.google.android.material.chip.Chip;
 import com.vedad.cinevo.BuildConfig;
+import com.vedad.cinevo.R;
 import com.vedad.cinevo.data.local.SavedMovie;
 import com.vedad.cinevo.data.remote.RetrofitClient;
 import com.vedad.cinevo.data.repository.RuntimeRepository;
@@ -32,8 +33,10 @@ import com.vedad.cinevo.databinding.ActivityMovieDetailsBinding;
 import com.vedad.cinevo.model.Movie;
 import com.vedad.cinevo.model.MovieDetails;
 import com.vedad.cinevo.ui.home.MovieAdapter;
+import com.vedad.cinevo.ui.settings.SettingsActivity;
 import com.vedad.cinevo.util.AppSettings;
 import com.vedad.cinevo.util.GenreUtils;
+import com.vedad.cinevo.util.RatingFormatter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -119,17 +122,19 @@ public class MovieDetailsActivity extends AppCompatActivity {
         binding.btnWatchlist.setOnClickListener(v -> toggle(SavedMovie.WATCHLIST, inWatchlist));
 
         viewModel.ratingOf(movieId).observe(this, rating -> {
-            int value = rating == null ? 0 : rating;
-            binding.ratingBar.setRating(value);
-            binding.tvRatingHint.setText(value == 0 ? "Ocijeni film" : "Tvoja ocjena: " + value + "/5");
+            int half = rating == null ? 0 : rating;
+            binding.ratingBar.setRating(half / 2f);
+            binding.tvRatingHint.setText(half == 0
+                    ? "Ocijeni film"
+                    : "Tvoja ocjena: " + RatingFormatter.stars(half) + "/5");
             binding.btnRemoveRating.setVisibility(
-                    value == 0 ? android.view.View.GONE : android.view.View.VISIBLE);
+                    half == 0 ? android.view.View.GONE : android.view.View.VISIBLE);
         });
 
-        binding.ratingBar.setOnRatingBarChangeListener((bar, rating, fromUser) -> {
-            if (!fromUser || currentDetails == null) return;
-            int value = Math.round(rating);
-            if (value >= 1) saveRating(value);
+        binding.ratingBar.setOnRatingChangeListener(rating -> {
+            if (currentDetails == null) return;
+            int half = Math.round(rating * 2);
+            if (half >= 1) saveRating(half);
         });
 
         binding.btnRemoveRating.setOnClickListener(v -> {
@@ -234,6 +239,14 @@ public class MovieDetailsActivity extends AppCompatActivity {
             binding.tvCast.setText(TextUtils.join(", ", cast));
         }
 
+        String directors = crewNames(d, "Director");
+        if (!directors.isEmpty()) {
+            binding.tvDirector.setText("Režija: " + directors);
+            binding.tvDirector.setVisibility(android.view.View.VISIBLE);
+        } else {
+            binding.tvDirector.setVisibility(android.view.View.GONE);
+        }
+
         String imagePath = d.getBackdropPath() != null ? d.getBackdropPath() : d.getPosterPath();
         if (imagePath != null) {
             Glide.with(this).load(BACKDROP_BASE_URL + imagePath).into(binding.imgBackdrop);
@@ -303,7 +316,10 @@ public class MovieDetailsActivity extends AppCompatActivity {
     private void showWatchProviders(MovieDetails d) {
         String region = new AppSettings(this).getWatchRegion();
         binding.sectionWatch.setVisibility(android.view.View.VISIBLE);
-        binding.tvWatchRegion.setText("Država: " + region);
+        binding.tvWatchTitle.setText("Gdje gledati (" + regionName(region) + ")");
+        binding.tvWatchRegion.setText("Promijeni državu u postavkama");
+        binding.tvWatchRegion.setOnClickListener(v ->
+                startActivity(new Intent(this, SettingsActivity.class)));
 
         MovieDetails.RegionProviders providers = null;
         if (d.getWatchProviders() != null && d.getWatchProviders().getResults() != null) {
@@ -419,5 +435,31 @@ public class MovieDetailsActivity extends AppCompatActivity {
         list.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         list.setAdapter(adapter);
         list.setNestedScrollingEnabled(false);
+    }
+
+    private String regionName(String code) {
+        String[] codes = getResources().getStringArray(R.array.region_values);
+        String[] names = getResources().getStringArray(R.array.region_entries);
+        for (int i = 0; i < codes.length; i++) {
+            if (codes[i].equals(code)) return names[i];
+        }
+        return code;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (currentDetails != null) showWatchProviders(currentDetails);
+    }
+
+    private String crewNames(MovieDetails d, String job) {
+        if (d.getCredits() == null || d.getCredits().getCrew() == null) return "";
+        List<String> names = new ArrayList<>();
+        for (MovieDetails.Crew member : d.getCredits().getCrew()) {
+            if (job.equals(member.getJob()) && !names.contains(member.getName())) {
+                names.add(member.getName());
+            }
+        }
+        return TextUtils.join(", ", names);
     }
 }

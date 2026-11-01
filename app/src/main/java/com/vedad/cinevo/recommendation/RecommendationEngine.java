@@ -125,7 +125,8 @@ public class RecommendationEngine {
         if (SavedMovie.FAVORITE.equals(s.listType)) return WEIGHT_FAVORITE;
         if (SavedMovie.WATCHLIST.equals(s.listType)) return WEIGHT_WATCHLIST;
         if (SavedMovie.WATCHED.equals(s.listType) && s.userRating >= 1) {
-            return (s.userRating - 3) / 2.0;
+            double stars = s.userRating / 2.0;
+            return Math.max(-1.0, Math.min(1.0, (stars - 3) / 2.0));
         }
         return 0.0;
     }

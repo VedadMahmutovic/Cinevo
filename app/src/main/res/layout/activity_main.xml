@@ -20,6 +20,11 @@
         android:id="@+id/bottomNav"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@color/cinevo_nav_background"
+        android:minHeight="60dp"
+        app:elevation="0dp"
+        app:itemPaddingBottom="4dp"
+        app:itemPaddingTop="4dp"
         app:menu="@menu/bottom_nav_menu" />
 
 </LinearLayout>

@@ -8,6 +8,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.navigation.NavController;
+import androidx.navigation.NavOptions;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.NavigationUI;
 
@@ -35,5 +36,23 @@ public class MainActivity extends AppCompatActivity {
                 .findFragmentById(R.id.navHost);
         NavController navController = navHost.getNavController();
         NavigationUI.setupWithNavController(binding.bottomNav, navController);
+
+        binding.bottomNav.setOnItemSelectedListener(item -> {
+            NavOptions options = new NavOptions.Builder()
+                    .setLaunchSingleTop(true)
+                    .setRestoreState(true)
+                    .setPopUpTo(navController.getGraph().getStartDestinationId(), false, true)
+                    .setEnterAnim(R.anim.fade_in)
+                    .setExitAnim(R.anim.fade_out)
+                    .setPopEnterAnim(R.anim.fade_in)
+                    .setPopExitAnim(R.anim.fade_out)
+                    .build();
+            try {
+                navController.navigate(item.getItemId(), null, options);
+                return true;
+            } catch (IllegalArgumentException e) {
+                return false;
+            }
+        });
     }
 }

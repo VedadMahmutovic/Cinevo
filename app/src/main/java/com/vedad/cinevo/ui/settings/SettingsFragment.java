@@ -13,11 +13,18 @@ import com.vedad.cinevo.data.repository.SavedMovieRepository;
 import com.vedad.cinevo.databinding.DialogAboutBinding;
 import com.vedad.cinevo.util.AppSettings;
 
+import android.graphics.drawable.Drawable;
+import androidx.core.content.ContextCompat;
+import androidx.core.graphics.drawable.DrawableCompat;
+import androidx.preference.PreferenceGroup;
+
 public class SettingsFragment extends PreferenceFragmentCompat {
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         setPreferencesFromResource(R.xml.preferences, rootKey);
+        tintIcons(getPreferenceScreen(),
+                ContextCompat.getColor(requireContext(), R.color.cinevo_icon_accent));
 
         Preference theme = findPreference(AppSettings.KEY_THEME);
         if (theme != null) {
@@ -65,5 +72,20 @@ public class SettingsFragment extends PreferenceFragmentCompat {
                 .setView(dialogBinding.getRoot())
                 .setPositiveButton("U redu", null)
                 .show();
+    }
+
+    private void tintIcons(PreferenceGroup group, int color) {
+        for (int i = 0; i < group.getPreferenceCount(); i++) {
+            Preference preference = group.getPreference(i);
+            if (preference instanceof PreferenceGroup) {
+                tintIcons((PreferenceGroup) preference, color);
+            }
+            Drawable icon = preference.getIcon();
+            if (icon != null) {
+                icon = DrawableCompat.wrap(icon.mutate());
+                DrawableCompat.setTint(icon, color);
+                preference.setIcon(icon);
+            }
+        }
     }
 }

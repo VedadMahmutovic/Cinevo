@@ -96,7 +96,8 @@
             android:text="Filteri"
             app:chipIcon="@drawable/ic_filter"
             app:chipIconVisible="true"
-            app:chipMinHeight="44dp" />
+            app:chipMinHeight="44dp"
+            app:chipIconTint="@color/cinevo_icon_accent"/>
 
         <com.google.android.material.chip.Chip
             android:id="@+id/chipSort"
