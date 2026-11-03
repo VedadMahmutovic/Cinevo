@@ -24,6 +24,8 @@ public class SavedMovie {
     public long addedAt;
     public String genreIds;
 
+    public String directorIds;
+
     @ColumnInfo(defaultValue = "0")
     public int userRating;
 }

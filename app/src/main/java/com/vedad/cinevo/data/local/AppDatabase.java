@@ -12,7 +12,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-@Database(entities = {SavedMovie.class}, version = 4, exportSchema = false)
+@Database(entities = {SavedMovie.class}, version = 5, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
 
     public abstract SavedMovieDao savedMovieDao();
@@ -42,7 +42,16 @@ public abstract class AppDatabase extends RoomDatabase {
     static final Migration MIGRATION_3_4 = new Migration(3, 4) {
         @Override
         public void migrate(@NonNull SupportSQLiteDatabase database) {
-            database.execSQL("UPDATE saved_movies SET userRating = userRating * 2 WHERE userRating > 0");
+            database.execSQL(
+                    "UPDATE saved_movies SET userRating = userRating * 2 WHERE userRating > 0");
+        }
+    };
+
+    // Verzija 5: dodani reditelji
+    static final Migration MIGRATION_4_5 = new Migration(4, 5) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("ALTER TABLE saved_movies ADD COLUMN directorIds TEXT");
         }
     };
 
@@ -54,7 +63,8 @@ public abstract class AppDatabase extends RoomDatabase {
                                     context.getApplicationContext(),
                                     AppDatabase.class,
                                     "cinevo.db")
-                            .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+                            .addMigrations(MIGRATION_1_2, MIGRATION_2_3,
+                                    MIGRATION_3_4, MIGRATION_4_5)
                             .build();
                 }
             }

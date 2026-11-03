@@ -11,7 +11,9 @@ import com.vedad.cinevo.data.local.SavedMovieDao;
 import com.vedad.cinevo.data.remote.RetrofitClient;
 import com.vedad.cinevo.data.remote.TmdbApi;
 import com.vedad.cinevo.model.Movie;
+import com.vedad.cinevo.model.MovieDetails;
 import com.vedad.cinevo.model.MovieResponse;
+import com.vedad.cinevo.model.PersonCredits;
 import com.vedad.cinevo.recommendation.RecommendationEngine;
 import com.vedad.cinevo.util.AppSettings;
 
@@ -34,6 +36,8 @@ public class RecommendationRepository {
     private static final String LANGUAGE = "en-US";
     private static final int TOP_GENRES = 3;
     private static final int MAX_FAVORITES_FOR_B = 5;
+    private static final int MAX_DIRECTORS = 2;
+    private static final int MAX_BACKFILL_PER_RUN = 10;
     private static final int RESULT_LIMIT = 20;
 
     private final SavedMovieDao dao;
@@ -49,12 +53,15 @@ public class RecommendationRepository {
         List<SavedMovie> saved = dao.getAll();
         if (saved.isEmpty()) return new ArrayList<>();
 
+        backfillDirectors(saved);
+
         double minRating = settings.getMinRating();
         int minVotes = settings.getMinVotes();
 
         Map<Integer, Double> profile = RecommendationEngine.buildProfile(saved);
         Map<Integer, Movie> candidates = new LinkedHashMap<>();
         Map<Integer, Integer> recCounts = new HashMap<>();
+        Set<Integer> directorMatchIds = new HashSet<>();
         Set<Integer> excludeIds = new HashSet<>();
 
         List<Integer> topGenres = RecommendationEngine.topGenres(profile, TOP_GENRES);
@@ -89,16 +96,72 @@ public class RecommendationRepository {
             }
         }
 
+        List<Integer> favoriteDirectors = RecommendationEngine.topDirectors(
+                RecommendationEngine.buildDirectorProfile(saved), MAX_DIRECTORS);
+        for (int directorId : favoriteDirectors) {
+            Response<PersonCredits> response = api.getPersonMovieCredits(
+                    directorId, BuildConfig.TMDB_API_KEY, LANGUAGE).execute();
+            if (!response.isSuccessful() || response.body() == null
+                    || response.body().getCrew() == null) {
+                continue;
+            }
+            for (PersonCredits.CreditMovie m : response.body().getCrew()) {
+                if (!"Director".equals(m.getJob())) continue;
+                if (!RecommendationEngine.isQualityCandidate(m, minRating, minVotes)) continue;
+                candidates.putIfAbsent(m.getId(), m);
+                directorMatchIds.add(m.getId());
+            }
+        }
+
         List<RecommendationEngine.ScoredMovie> ranked = RecommendationEngine.rank(
-                profile, candidates.values(), recCounts, excludeIds, RESULT_LIMIT);
+                profile, candidates.values(), recCounts, directorMatchIds,
+                excludeIds, RESULT_LIMIT);
 
         List<Movie> result = new ArrayList<>();
         for (RecommendationEngine.ScoredMovie s : ranked) {
             result.add(s.movie);
-            Log.d(TAG, String.format(Locale.US, "REC %s -> score %.3f",
-                    s.movie.getTitle(), s.score));
+            Log.d(TAG, String.format(Locale.US, "REC %s -> score %.3f%s",
+                    s.movie.getTitle(), s.score,
+                    directorMatchIds.contains(s.movie.getId()) ? " [reditelj]" : ""));
         }
         return result;
+    }
+
+    private void backfillDirectors(List<SavedMovie> saved) throws IOException {
+        Map<Integer, String> fetched = new HashMap<>();
+        int calls = 0;
+
+        for (SavedMovie s : saved) {
+            if (s.directorIds != null) continue;
+
+            String ids = fetched.get(s.id);
+            if (ids == null) {
+                if (calls >= MAX_BACKFILL_PER_RUN) continue;
+                calls++;
+
+                Response<MovieDetails> response = api.getMovieDetails(
+                        s.id, BuildConfig.TMDB_API_KEY, LANGUAGE, "credits").execute();
+                if (!response.isSuccessful() || response.body() == null) continue;
+
+                ids = directorIdsOf(response.body());
+                fetched.put(s.id, ids);
+                dao.updateDirectors(s.id, ids);
+            }
+            s.directorIds = ids;
+        }
+    }
+
+    private String directorIdsOf(MovieDetails details) {
+        List<String> ids = new ArrayList<>();
+        if (details.getCredits() != null && details.getCredits().getCrew() != null) {
+            for (MovieDetails.Crew member : details.getCredits().getCrew()) {
+                String id = String.valueOf(member.getId());
+                if ("Director".equals(member.getJob()) && !ids.contains(id)) {
+                    ids.add(id);
+                }
+            }
+        }
+        return TextUtils.join(",", ids);
     }
 
     private List<Movie> bodyOrEmpty(Response<MovieResponse> response) {

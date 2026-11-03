@@ -51,12 +51,6 @@ public class RecommendationEngineTest {
         return RecommendationEngine.rank(profile, candidates, recCounts, exclude, limit);
     }
 
-    private SavedMovie watched(int id, int rating, String genres) {
-        SavedMovie s = saved(id, SavedMovie.WATCHED, genres);
-        s.userRating = rating;
-        return s;
-    }
-
     private SavedMovie watched(int id, double stars, String genres) {
         SavedMovie s = saved(id, SavedMovie.WATCHED, genres);
         s.userRating = (int) Math.round(stars * 2);
@@ -260,5 +254,40 @@ public class RecommendationEngineTest {
                 Arrays.asList(watched(1, 4.5, "12")));
 
         assertEquals(0.75, profile.get(12), DELTA);
+    }
+
+    @Test
+    public void buildDirectorProfile_usesOnlyPositiveSignals() {
+        SavedMovie liked = saved(1, SavedMovie.FAVORITE, "28");
+        liked.directorIds = "525";
+        SavedMovie disliked = watched(2, 1.0, "35");
+        disliked.directorIds = "999";
+
+        Map<Integer, Double> profile = RecommendationEngine.buildDirectorProfile(
+                Arrays.asList(liked, disliked));
+
+        assertEquals(1.0, profile.get(525), DELTA);
+        assertFalse(profile.containsKey(999));
+    }
+
+    @Test
+    public void topDirectors_requiresMinimumWeight() {
+        Map<Integer, Double> profile = profileOf(525, 1.0, 7, 0.5);
+
+        assertEquals(Arrays.asList(525), RecommendationEngine.topDirectors(profile, 5));
+    }
+
+    @Test
+    public void rank_directorMatchAddsBonus() {
+        Map<Integer, Double> profile = profileOf(27, 1.0);
+        Set<Integer> directorMatches = new HashSet<>(Arrays.asList(2));
+
+        List<RecommendationEngine.ScoredMovie> ranked = RecommendationEngine.rank(profile,
+                Arrays.asList(movie(1, 7.0, 27), movie(2, 7.0, 27)),
+                new HashMap<Integer, Integer>(), directorMatches, new HashSet<Integer>(), 10);
+
+        assertEquals(2, ranked.get(0).movie.getId());
+        assertEquals(RecommendationEngine.W_DIRECTOR,
+                ranked.get(0).score - ranked.get(1).score, DELTA);
     }
 }

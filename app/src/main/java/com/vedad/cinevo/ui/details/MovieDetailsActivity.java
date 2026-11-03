@@ -307,6 +307,13 @@ public class MovieDetailsActivity extends AppCompatActivity {
         movie.releaseDate = currentDetails.getReleaseDate();
         movie.overview = currentDetails.getOverview();
         movie.genreIds = GenreUtils.fromGenres(currentDetails.getGenres());
+
+        List<String> directorIds = new ArrayList<>();
+        for (MovieDetails.Crew director : directorsOf(currentDetails)) {
+            directorIds.add(String.valueOf(director.getId()));
+        }
+
+        movie.directorIds = TextUtils.join(",", directorIds);
         movie.addedAt = System.currentTimeMillis();
         return movie;
     }

@@ -31,4 +31,7 @@ public interface SavedMovieDao {
 
     @Query("SELECT userRating FROM saved_movies WHERE id = :id AND listType = 'WATCHED'")
     LiveData<Integer> ratingOf(int id);
+
+    @Query("UPDATE saved_movies SET directorIds = :directorIds WHERE id = :id")
+    void updateDirectors(int id, String directorIds);
 }
