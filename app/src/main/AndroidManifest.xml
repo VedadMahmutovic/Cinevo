@@ -28,6 +28,9 @@
         <activity
             android:name=".ui.settings.SettingsActivity"
             android:exported="false" />
+        <activity
+            android:name=".ui.person.PersonMoviesActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

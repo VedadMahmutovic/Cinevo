@@ -24,6 +24,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.google.android.material.chip.Chip;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.vedad.cinevo.BuildConfig;
 import com.vedad.cinevo.R;
 import com.vedad.cinevo.data.local.SavedMovie;
@@ -33,6 +34,7 @@ import com.vedad.cinevo.databinding.ActivityMovieDetailsBinding;
 import com.vedad.cinevo.model.Movie;
 import com.vedad.cinevo.model.MovieDetails;
 import com.vedad.cinevo.ui.home.MovieAdapter;
+import com.vedad.cinevo.ui.person.PersonMoviesActivity;
 import com.vedad.cinevo.ui.settings.SettingsActivity;
 import com.vedad.cinevo.util.AppSettings;
 import com.vedad.cinevo.util.GenreUtils;
@@ -62,6 +64,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
     private ProviderAdapter streamAdapter;
     private ProviderAdapter rentAdapter;
     private ProviderAdapter buyAdapter;
+    private CastAdapter castAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,6 +110,14 @@ public class MovieDetailsActivity extends AppCompatActivity {
             intent.putExtra(EXTRA_MOVIE_ID, movie.getId());
             startActivity(intent);
         });
+
+        castAdapter = new CastAdapter();
+        binding.recyclerCast.setLayoutManager(
+                new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        binding.recyclerCast.setAdapter(castAdapter);
+        binding.recyclerCast.setNestedScrollingEnabled(false);
+        castAdapter.setOnCastClickListener(member -> openPerson(member.getId(), member.getName(),
+                member.getProfilePath(), PersonMoviesActivity.ROLE_ACTOR));
 
         viewModel.countOf(movieId, SavedMovie.FAVORITE).observe(this, count -> {
             isFavorite = count != null && count > 0;
@@ -230,21 +241,35 @@ public class MovieDetailsActivity extends AppCompatActivity {
         binding.tvOverview.setText(TextUtils.isEmpty(d.getOverview())
                 ? "Opis nije dostupan." : d.getOverview());
 
+        List<MovieDetails.Cast> allCast = new ArrayList<>();
         if (d.getCredits() != null && d.getCredits().getCast() != null) {
-            List<String> cast = new ArrayList<>();
-            for (MovieDetails.Cast c : d.getCredits().getCast()) {
-                if (cast.size() == 8) break;
-                cast.add(c.getName());
-            }
-            binding.tvCast.setText(TextUtils.join(", ", cast));
+            allCast.addAll(d.getCredits().getCast());
         }
+        viewModel.setFullCast(allCast);
 
-        String directors = crewNames(d, "Director");
-        if (!directors.isEmpty()) {
-            binding.tvDirector.setText("Režija: " + directors);
-            binding.tvDirector.setVisibility(android.view.View.VISIBLE);
-        } else {
+        List<MovieDetails.Cast> preview = new ArrayList<>(
+                allCast.size() > 15 ? allCast.subList(0, 15) : allCast);
+        castAdapter.setCast(preview);
+
+        binding.sectionCast.setVisibility(
+                allCast.isEmpty() ? android.view.View.GONE : android.view.View.VISIBLE);
+
+        boolean hasMore = allCast.size() > 15;
+        binding.btnCastAll.setVisibility(hasMore
+                ? android.view.View.VISIBLE : android.view.View.GONE);
+        binding.btnCastAll.setText("Pogledaj sve (" + allCast.size() + ")");
+        binding.btnCastAll.setOnClickListener(v ->
+                new CastBottomSheet().show(getSupportFragmentManager(), "cast"));
+
+        List<MovieDetails.Crew> directors = directorsOf(d);
+        if (directors.isEmpty()) {
             binding.tvDirector.setVisibility(android.view.View.GONE);
+        } else {
+            List<String> names = new ArrayList<>();
+            for (MovieDetails.Crew c : directors) names.add(c.getName());
+            binding.tvDirector.setText("Režija: " + TextUtils.join(", ", names));
+            binding.tvDirector.setVisibility(android.view.View.VISIBLE);
+            binding.tvDirector.setOnClickListener(v -> openDirector(directors));
         }
 
         String imagePath = d.getBackdropPath() != null ? d.getBackdropPath() : d.getPosterPath();
@@ -452,14 +477,44 @@ public class MovieDetailsActivity extends AppCompatActivity {
         if (currentDetails != null) showWatchProviders(currentDetails);
     }
 
-    private String crewNames(MovieDetails d, String job) {
-        if (d.getCredits() == null || d.getCredits().getCrew() == null) return "";
-        List<String> names = new ArrayList<>();
+    private List<MovieDetails.Crew> directorsOf(MovieDetails d) {
+        List<MovieDetails.Crew> result = new ArrayList<>();
+        if (d.getCredits() == null || d.getCredits().getCrew() == null) return result;
         for (MovieDetails.Crew member : d.getCredits().getCrew()) {
-            if (job.equals(member.getJob()) && !names.contains(member.getName())) {
-                names.add(member.getName());
+            if (!"Director".equals(member.getJob())) continue;
+            boolean exists = false;
+            for (MovieDetails.Crew c : result) {
+                if (c.getId() == member.getId()) exists = true;
             }
+            if (!exists) result.add(member);
         }
-        return TextUtils.join(", ", names);
+        return result;
+    }
+
+    private void openDirector(List<MovieDetails.Crew> directors) {
+        if (directors.size() == 1) {
+            MovieDetails.Crew c = directors.get(0);
+            openPerson(c.getId(), c.getName(), c.getProfilePath(), PersonMoviesActivity.ROLE_DIRECTOR);
+            return;
+        }
+        String[] names = new String[directors.size()];
+        for (int i = 0; i < names.length; i++) names[i] = directors.get(i).getName();
+        new MaterialAlertDialogBuilder(this)
+                .setTitle("Izaberi reditelja")
+                .setItems(names, (dialog, which) -> {
+                    MovieDetails.Crew c = directors.get(which);
+                    openPerson(c.getId(), c.getName(), c.getProfilePath(),
+                            PersonMoviesActivity.ROLE_DIRECTOR);
+                })
+                .show();
+    }
+
+    private void openPerson(int id, String name, String photo, String role) {
+        Intent intent = new Intent(this, PersonMoviesActivity.class);
+        intent.putExtra(PersonMoviesActivity.EXTRA_ID, id);
+        intent.putExtra(PersonMoviesActivity.EXTRA_NAME, name);
+        intent.putExtra(PersonMoviesActivity.EXTRA_PHOTO, photo);
+        intent.putExtra(PersonMoviesActivity.EXTRA_ROLE, role);
+        startActivity(intent);
     }
 }

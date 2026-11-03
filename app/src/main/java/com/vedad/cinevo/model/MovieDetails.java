@@ -110,17 +110,31 @@ public class MovieDetails {
     }
 
     public static class Cast {
+        private int id;
         private String name;
+        private String character;
 
+        @SerializedName("profile_path")
+        private String profilePath;
+
+        public int getId() { return id; }
         public String getName() { return name; }
+        public String getCharacter() { return character; }
+        public String getProfilePath() { return profilePath; }
     }
 
     public static class Crew {
+        private int id;
         private String name;
         private String job;
 
+        @SerializedName("profile_path")
+        private String profilePath;
+
+        public int getId() { return id; }
         public String getName() { return name; }
         public String getJob() { return job; }
+        public String getProfilePath() { return profilePath; }
     }
 
     public static class Recommendations {

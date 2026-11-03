@@ -2,6 +2,7 @@ package com.vedad.cinevo.data.remote;
 
 import com.vedad.cinevo.model.MovieDetails;
 import com.vedad.cinevo.model.MovieResponse;
+import com.vedad.cinevo.model.PersonCredits;
 
 import java.util.Map;
 
@@ -60,5 +61,12 @@ public interface TmdbApi {
             @Query("language") String language,
             @QueryMap Map<String, String> filters,
             @Query("page") int page
+    );
+
+    @GET("person/{person_id}/movie_credits")
+    Call<PersonCredits> getPersonMovieCredits(
+            @Path("person_id") int personId,
+            @Query("api_key") String apiKey,
+            @Query("language") String language
     );
 }

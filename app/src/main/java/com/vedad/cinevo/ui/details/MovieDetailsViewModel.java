@@ -8,10 +8,16 @@ import androidx.lifecycle.LiveData;
 
 import com.vedad.cinevo.data.local.SavedMovie;
 import com.vedad.cinevo.data.repository.SavedMovieRepository;
+import com.vedad.cinevo.model.MovieDetails;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MovieDetailsViewModel extends AndroidViewModel {
 
     private final SavedMovieRepository repository;
+
+    private List<MovieDetails.Cast> fullCast = new ArrayList<>();
 
     public MovieDetailsViewModel(@NonNull Application application) {
         super(application);
@@ -32,5 +38,13 @@ public class MovieDetailsViewModel extends AndroidViewModel {
 
     public LiveData<Integer> ratingOf(int movieId) {
         return repository.ratingOf(movieId);
+    }
+
+    public void setFullCast(List<MovieDetails.Cast> cast) {
+        fullCast = new ArrayList<>(cast);
+    }
+
+    public List<MovieDetails.Cast> getFullCast() {
+        return fullCast;
     }
 }
