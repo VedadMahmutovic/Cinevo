@@ -7,6 +7,7 @@ import androidx.lifecycle.LiveData;
 import com.vedad.cinevo.data.local.AppDatabase;
 import com.vedad.cinevo.data.local.SavedMovie;
 import com.vedad.cinevo.data.local.SavedMovieDao;
+import com.vedad.cinevo.data.local.SavedStatus;
 
 import java.util.List;
 
@@ -40,5 +41,9 @@ public class SavedMovieRepository {
 
     public LiveData<Integer> ratingOf(int id) {
         return dao.ratingOf(id);
+    }
+
+    public LiveData<List<SavedStatus>> getStatuses() {
+        return dao.getAllStatuses();
     }
 }

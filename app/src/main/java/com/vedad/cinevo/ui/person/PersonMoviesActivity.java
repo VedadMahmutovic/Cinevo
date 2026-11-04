@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import com.bumptech.glide.Glide;
 import com.vedad.cinevo.BuildConfig;
 import com.vedad.cinevo.data.remote.RetrofitClient;
+import com.vedad.cinevo.data.repository.SavedMovieRepository;
 import com.vedad.cinevo.databinding.ActivityPersonMoviesBinding;
 import com.vedad.cinevo.model.Movie;
 import com.vedad.cinevo.model.PersonCredits;
@@ -80,6 +81,7 @@ public class PersonMoviesActivity extends AppCompatActivity {
         }
 
         adapter = new MovieAdapter();
+        adapter.observeStatuses(this, new SavedMovieRepository(this).getStatuses());
         binding.recyclerPerson.setLayoutManager(new GridLayoutManager(
                 this, new AppSettings(this).getGridColumns()));
         binding.recyclerPerson.setAdapter(adapter);

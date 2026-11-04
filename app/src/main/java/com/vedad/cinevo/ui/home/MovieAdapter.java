@@ -1,14 +1,19 @@
 package com.vedad.cinevo.ui.home;
 
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.LiveData;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.vedad.cinevo.R;
+import com.vedad.cinevo.data.local.SavedMovie;
+import com.vedad.cinevo.data.local.SavedStatus;
 import com.vedad.cinevo.data.repository.RuntimeRepository;
 import com.vedad.cinevo.databinding.ItemMovieBinding;
 import com.vedad.cinevo.model.Movie;
@@ -17,24 +22,53 @@ import com.vedad.cinevo.util.RatingFormatter;
 import com.vedad.cinevo.util.RuntimeFormatter;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import retrofit2.Call;
 
 public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHolder> {
 
     private static final String IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500";
+    private static final String PAYLOAD_STATUS = "status";
+
+    private static final int FLAG_FAVORITE = 1;
+    private static final int FLAG_WATCHLIST = 2;
+    private static final int FLAG_WATCHED = 4;
 
     public interface OnMovieClickListener {
         void onMovieClick(Movie movie);
     }
 
     private final List<Movie> movies = new ArrayList<>();
+    private final Map<Integer, Integer> statusFlags = new HashMap<>();
     private OnMovieClickListener listener;
+    private int fixedItemWidth = 0;
 
     public void setOnMovieClickListener(OnMovieClickListener listener) {
         this.listener = listener;
+    }
+
+    public void setFixedItemWidth(int widthPx) {
+        this.fixedItemWidth = widthPx;
+    }
+
+    public void observeStatuses(LifecycleOwner owner, LiveData<List<SavedStatus>> source) {
+        source.observe(owner, list -> {
+            statusFlags.clear();
+            for (SavedStatus s : list) {
+                int flag;
+                if (SavedMovie.FAVORITE.equals(s.listType)) flag = FLAG_FAVORITE;
+                else if (SavedMovie.WATCHLIST.equals(s.listType)) flag = FLAG_WATCHLIST;
+                else flag = FLAG_WATCHED;
+
+                Integer current = statusFlags.get(s.id);
+                statusFlags.put(s.id, (current == null ? 0 : current) | flag);
+            }
+            notifyItemRangeChanged(0, getItemCount(), PAYLOAD_STATUS);
+        });
     }
 
     public void setMovies(List<Movie> newMovies) {
@@ -67,6 +101,12 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
         diff.dispatchUpdatesTo(this);
     }
 
+    public void setMoviesInstant(List<Movie> newMovies) {
+        movies.clear();
+        movies.addAll(newMovies);
+        notifyDataSetChanged();
+    }
+
     @NonNull
     @Override
     public MovieViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -78,6 +118,16 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
             binding.getRoot().setLayoutParams(params);
         }
         return new MovieViewHolder(binding);
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull MovieViewHolder holder, int position,
+                                 @NonNull List<Object> payloads) {
+        if (!payloads.isEmpty()) {
+            bindStatus(holder, movies.get(position).getId());
+            return;
+        }
+        super.onBindViewHolder(holder, position, payloads);
     }
 
     @Override
@@ -118,6 +168,8 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
             holder.binding.tvRating.setBackgroundResource(R.drawable.bg_badge_dark);
         }
 
+        bindStatus(holder, movie.getId());
+
         String url = movie.getPosterPath() != null
                 ? IMAGE_BASE_URL + movie.getPosterPath()
                 : null;
@@ -130,6 +182,32 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
         holder.binding.getRoot().setOnClickListener(v -> {
             if (listener != null) listener.onMovieClick(movie);
         });
+    }
+
+    private void bindStatus(MovieViewHolder holder, int movieId) {
+        Integer stored = statusFlags.get(movieId);
+        int flags = stored == null ? 0 : stored;
+
+        holder.binding.iconFavorite.setVisibility(
+                (flags & FLAG_FAVORITE) != 0 ? View.VISIBLE : View.GONE);
+        holder.binding.iconWatchlist.setVisibility(
+                (flags & FLAG_WATCHLIST) != 0 ? View.VISIBLE : View.GONE);
+        holder.binding.iconWatched.setVisibility(
+                (flags & FLAG_WATCHED) != 0 ? View.VISIBLE : View.GONE);
+        holder.binding.statusRow.setVisibility(flags == 0 ? View.GONE : View.VISIBLE);
+    }
+
+    private static String yearWithRuntime(String year, int minutes) {
+        String runtime = RuntimeFormatter.format(minutes);
+        return year.isEmpty() ? runtime : year + " · " + runtime;
+    }
+
+    @Override
+    public void onViewRecycled(@NonNull MovieViewHolder holder) {
+        if (holder.runtimeCall != null) {
+            holder.runtimeCall.cancel();
+            holder.runtimeCall = null;
+        }
     }
 
     @Override
@@ -146,30 +224,5 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
             super(binding.getRoot());
             this.binding = binding;
         }
-    }
-
-    private int fixedItemWidth = 0;
-
-    public void setFixedItemWidth(int widthPx) {
-        this.fixedItemWidth = widthPx;
-    }
-
-    private static String yearWithRuntime(String year, int minutes) {
-        String runtime = RuntimeFormatter.format(minutes);
-        return year.isEmpty() ? runtime : year + " · " + runtime;
-    }
-
-    @Override
-    public void onViewRecycled(@NonNull MovieViewHolder holder) {
-        if (holder.runtimeCall != null) {
-            holder.runtimeCall.cancel();
-            holder.runtimeCall = null;
-        }
-    }
-
-    public void setMoviesInstant(List<Movie> newMovies) {
-        movies.clear();
-        movies.addAll(newMovies);
-        notifyDataSetChanged();
     }
 }

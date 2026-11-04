@@ -122,6 +122,32 @@
             app:tint="?attr/colorOnSurface" />
     </LinearLayout>
 
+    <LinearLayout
+        android:id="@+id/sectionPeople"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="20dp"
+            android:paddingTop="8dp"
+            android:text="Osobe"
+            android:textColor="?attr/colorOnSurface"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerPeople"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clipToPadding="false"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp" />
+    </LinearLayout>
+
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"

@@ -30,6 +30,7 @@ import com.vedad.cinevo.R;
 import com.vedad.cinevo.data.local.SavedMovie;
 import com.vedad.cinevo.data.remote.RetrofitClient;
 import com.vedad.cinevo.data.repository.RuntimeRepository;
+import com.vedad.cinevo.data.repository.SavedMovieRepository;
 import com.vedad.cinevo.databinding.ActivityMovieDetailsBinding;
 import com.vedad.cinevo.model.Movie;
 import com.vedad.cinevo.model.MovieDetails;
@@ -101,6 +102,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
         viewModel = new ViewModelProvider(this).get(MovieDetailsViewModel.class);
 
         similarAdapter = new MovieAdapter();
+        similarAdapter.observeStatuses(this, new SavedMovieRepository(this).getStatuses());
         similarAdapter.setFixedItemWidth((int) (130 * getResources().getDisplayMetrics().density));
         binding.recyclerSimilar.setLayoutManager(
                 new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));

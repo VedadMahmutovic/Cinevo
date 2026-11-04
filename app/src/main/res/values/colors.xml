@@ -29,4 +29,7 @@
     <color name="cinevo_badge_user">#5B3FE0</color>
     <color name="cinevo_icon_accent">#8B75FF</color>
     <color name="cinevo_nav_background">#E9E7F2</color>
+
+    <color name="cinevo_heart">#FF5A7A</color>
+    <color name="cinevo_check">#4ADE80</color>
 </resources>

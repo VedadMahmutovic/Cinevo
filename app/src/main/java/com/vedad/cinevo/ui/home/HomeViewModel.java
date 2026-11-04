@@ -12,6 +12,7 @@ import com.vedad.cinevo.data.remote.TmdbApi;
 import com.vedad.cinevo.model.Movie;
 import com.vedad.cinevo.model.MovieFilter;
 import com.vedad.cinevo.model.MovieResponse;
+import com.vedad.cinevo.model.PersonSearchResponse;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -49,6 +50,10 @@ public class HomeViewModel extends ViewModel {
     private final MutableLiveData<String> queryLive = new MutableLiveData<>("");
     private final MutableLiveData<MovieFilter> filterLive = new MutableLiveData<>(new MovieFilter());
 
+    private final MutableLiveData<List<PersonSearchResponse.Person>> people =
+            new MutableLiveData<>(new ArrayList<>());
+    private Call<PersonSearchResponse> peopleCall;
+
     private final List<Movie> allMovies = new ArrayList<>();
     private final Set<Integer> seenIds = new HashSet<>();
 
@@ -65,6 +70,7 @@ public class HomeViewModel extends ViewModel {
     public LiveData<StateMessage> getStateMessage() { return stateMessage; }
     public LiveData<String> getQueryLive() { return queryLive; }
     public LiveData<MovieFilter> getFilterLive() { return filterLive; }
+    public LiveData<List<PersonSearchResponse.Person>> getPeople() { return people; }
 
     public MovieFilter getFilter() {
         return filter.copy();
@@ -116,6 +122,8 @@ public class HomeViewModel extends ViewModel {
     }
 
     private void reload() {
+        if (peopleCall != null) peopleCall.cancel();
+        people.setValue(new ArrayList<>());
         if (currentCall != null) currentCall.cancel();
         allMovies.clear();
         seenIds.clear();
@@ -126,6 +134,7 @@ public class HomeViewModel extends ViewModel {
         isLoading = false;
         loading.setValue(false);
         loadNextPage();
+        if (!query.isEmpty()) loadPeople();
     }
 
     private Call<MovieResponse> buildCall(int pageNumber) {
@@ -173,7 +182,7 @@ public class HomeViewModel extends ViewModel {
                     if (!allMovies.isEmpty()) {
                         stateMessage.setValue(null);
                     } else if (!query.isEmpty()) {
-                        stateMessage.setValue(new StateMessage("Nema rezultata za: " + query, false));
+                        stateMessage.setValue(new StateMessage("Nema filmova za: " + query, false));
                     } else if (filter.isActive()) {
                         stateMessage.setValue(new StateMessage("Nema filmova za odabrane filtere", false));
                     }
@@ -191,6 +200,40 @@ public class HomeViewModel extends ViewModel {
             }
         });
     }
+
+    private void loadPeople() {
+        final String searchQuery = query;
+        Call<PersonSearchResponse> call = api.searchPeople(
+                BuildConfig.TMDB_API_KEY, LANGUAGE, searchQuery, 1);
+        peopleCall = call;
+
+        call.enqueue(new Callback<PersonSearchResponse>() {
+            @Override
+            public void onResponse(Call<PersonSearchResponse> call,
+                                   Response<PersonSearchResponse> response) {
+                if (call.isCanceled() || !searchQuery.equals(query)) return;
+                if (!response.isSuccessful() || response.body() == null
+                        || response.body().getResults() == null) {
+                    return;
+                }
+
+                List<PersonSearchResponse.Person> filtered = new ArrayList<>();
+                for (PersonSearchResponse.Person p : response.body().getResults()) {
+                    String department = p.getKnownForDepartment();
+                    if (!"Directing".equals(department) && !"Acting".equals(department)) continue;
+                    filtered.add(p);
+                    if (filtered.size() == 10) break;
+                }
+                people.setValue(filtered);
+            }
+
+            @Override
+            public void onFailure(Call<PersonSearchResponse> call, Throwable t) {
+
+            }
+        });
+    }
+
     private void reportError(String text) {
         if (allMovies.isEmpty()) {
             stateMessage.setValue(new StateMessage(text, true));
@@ -202,5 +245,6 @@ public class HomeViewModel extends ViewModel {
     @Override
     protected void onCleared() {
         if (currentCall != null) currentCall.cancel();
+        if (peopleCall != null) peopleCall.cancel();
     }
 }

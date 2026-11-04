@@ -23,13 +23,16 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.color.MaterialColors;
 import com.vedad.cinevo.R;
+import com.vedad.cinevo.data.repository.SavedMovieRepository;
 import com.vedad.cinevo.databinding.FragmentHomeBinding;
 import com.vedad.cinevo.model.MovieFilter;
 import com.vedad.cinevo.ui.details.MovieDetailsActivity;
+import com.vedad.cinevo.ui.person.PersonMoviesActivity;
 import com.vedad.cinevo.ui.settings.SettingsActivity;
 import com.vedad.cinevo.util.AppSettings;
 
@@ -47,6 +50,7 @@ public class HomeFragment extends Fragment {
 
     private final Handler searchHandler = new Handler(Looper.getMainLooper());
     private Runnable pendingSearch;
+    private PeopleAdapter peopleAdapter;
 
     @Nullable
     @Override
@@ -73,6 +77,8 @@ public class HomeFragment extends Fragment {
 
     private void setupList(AppSettings settings) {
         adapter = new MovieAdapter();
+        adapter.observeStatuses(getViewLifecycleOwner(),
+                new SavedMovieRepository(requireContext()).getStatuses());
         layoutManager = new GridLayoutManager(requireContext(), settings.getGridColumns());
         binding.recyclerMovies.setLayoutManager(layoutManager);
         binding.recyclerMovies.setAdapter(adapter);
@@ -99,6 +105,23 @@ public class HomeFragment extends Fragment {
         adapter.setOnMovieClickListener(movie -> {
             Intent intent = new Intent(requireContext(), MovieDetailsActivity.class);
             intent.putExtra(MovieDetailsActivity.EXTRA_MOVIE_ID, movie.getId());
+            startActivity(intent);
+        });
+
+        peopleAdapter = new PeopleAdapter();
+        binding.recyclerPeople.setLayoutManager(
+                new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
+        binding.recyclerPeople.setAdapter(peopleAdapter);
+        peopleAdapter.setOnPersonClickListener(person -> {
+            String role = "Directing".equals(person.getKnownForDepartment())
+                    ? PersonMoviesActivity.ROLE_DIRECTOR
+                    : PersonMoviesActivity.ROLE_ACTOR;
+
+            Intent intent = new Intent(requireContext(), PersonMoviesActivity.class);
+            intent.putExtra(PersonMoviesActivity.EXTRA_ID, person.getId());
+            intent.putExtra(PersonMoviesActivity.EXTRA_NAME, person.getName());
+            intent.putExtra(PersonMoviesActivity.EXTRA_PHOTO, person.getProfilePath());
+            intent.putExtra(PersonMoviesActivity.EXTRA_ROLE, role);
             startActivity(intent);
         });
     }
@@ -260,6 +283,11 @@ public class HomeFragment extends Fragment {
                 Toast.makeText(requireContext(), text, Toast.LENGTH_SHORT).show();
                 viewModel.clearMessage();
             }
+        });
+
+        viewModel.getPeople().observe(getViewLifecycleOwner(), people -> {
+            peopleAdapter.setPeople(people);
+            binding.sectionPeople.setVisibility(people.isEmpty() ? View.GONE : View.VISIBLE);
         });
     }
 

@@ -34,4 +34,7 @@ public interface SavedMovieDao {
 
     @Query("UPDATE saved_movies SET directorIds = :directorIds WHERE id = :id")
     void updateDirectors(int id, String directorIds);
+
+    @Query("SELECT id, listType FROM saved_movies")
+    LiveData<List<SavedStatus>> getAllStatuses();
 }
