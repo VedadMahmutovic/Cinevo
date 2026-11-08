@@ -3,6 +3,7 @@ package com.vedad.cinevo.recommendation;
 import com.vedad.cinevo.data.local.SavedMovie;
 import com.vedad.cinevo.model.Movie;
 import com.vedad.cinevo.util.GenreUtils;
+import com.vedad.cinevo.util.GenreCatalog;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -12,21 +13,20 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Locale;
 
 public class RecommendationEngine {
 
     public static final double WEIGHT_FAVORITE = 1.0;
     public static final double WEIGHT_WATCHLIST = 0.5;
-
     public static final double W_COSINE = 0.6;
     public static final double W_RATING = 0.2;
     public static final double W_COUNT = 0.2;
     public static final double W_DIRECTOR = 0.15;
-
     public static final double MIN_DIRECTOR_WEIGHT = 1.0;
-
     public static final int MIN_VOTE_COUNT = 100;
     public static final double MIN_RATING = 6.0;
+    public static final double WEIGHT_DISMISSED = -0.25;
 
     public static boolean isQualityCandidate(Movie movie) {
         return isQualityCandidate(movie, MIN_RATING, MIN_VOTE_COUNT);
@@ -51,6 +51,7 @@ public class RecommendationEngine {
     public static double weightOf(SavedMovie s) {
         if (SavedMovie.FAVORITE.equals(s.listType)) return WEIGHT_FAVORITE;
         if (SavedMovie.WATCHLIST.equals(s.listType)) return WEIGHT_WATCHLIST;
+        if (SavedMovie.DISMISSED.equals(s.listType)) return WEIGHT_DISMISSED;
         if (SavedMovie.WATCHED.equals(s.listType) && s.userRating >= 1) {
             double stars = s.userRating / 2.0;
             return Math.max(-1.0, Math.min(1.0, (stars - 3) / 2.0));
@@ -162,5 +163,47 @@ public class RecommendationEngine {
 
         Collections.sort(scored, (a, b) -> Double.compare(b.score, a.score));
         return scored.size() > limit ? new ArrayList<>(scored.subList(0, limit)) : scored;
+    }
+
+    public static String explain(Movie movie, Map<Integer, Double> profile,
+                                 List<String> seedTitles, String directorName) {
+        List<String> parts = new ArrayList<>();
+
+        if (seedTitles != null && !seedTitles.isEmpty()) {
+            String first = seedTitles.get(0);
+            parts.add(seedTitles.size() == 1
+                    ? "Jer ti se sviđa " + first
+                    : "Jer ti se sviđa " + first + " i još " + (seedTitles.size() - 1));
+        }
+
+        if (directorName != null && !directorName.isEmpty()) {
+            parts.add("Režija: " + directorName);
+        }
+
+        List<Integer> shared = new ArrayList<>();
+        for (int genreId : new HashSet<>(movie.getGenreIds())) {
+            Double weight = profile.get(genreId);
+            if (weight != null && weight > 0) shared.add(genreId);
+        }
+        Collections.sort(shared, (a, b) -> Double.compare(profile.get(b), profile.get(a)));
+        if (!shared.isEmpty()) {
+            StringBuilder genres = new StringBuilder();
+            for (int i = 0; i < Math.min(2, shared.size()); i++) {
+                if (i > 0) genres.append(", ");
+                genres.append(GenreCatalog.nameOf(shared.get(i)));
+            }
+            parts.add("Žanr: " + genres);
+        }
+
+        if (parts.isEmpty()) {
+            parts.add(String.format(Locale.US, "Visoko ocijenjen (%.1f)", movie.getVoteAverage()));
+        }
+
+        StringBuilder result = new StringBuilder();
+        for (int i = 0; i < Math.min(2, parts.size()); i++) {
+            if (i > 0) result.append(" • ");
+            result.append(parts.get(i));
+        }
+        return result.toString();
     }
 }

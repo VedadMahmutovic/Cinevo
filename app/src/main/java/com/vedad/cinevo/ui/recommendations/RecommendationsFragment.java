@@ -13,16 +13,23 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 
+import com.google.android.material.snackbar.Snackbar;
+import com.vedad.cinevo.R;
 import com.vedad.cinevo.databinding.FragmentRecommendationsBinding;
+import com.vedad.cinevo.model.Movie;
 import com.vedad.cinevo.ui.details.MovieDetailsActivity;
 import com.vedad.cinevo.ui.home.MovieAdapter;
 import com.vedad.cinevo.util.AppSettings;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class RecommendationsFragment extends Fragment {
 
     private FragmentRecommendationsBinding binding;
     private RecommendationsViewModel viewModel;
     private MovieAdapter adapter;
+    private List<Movie> shown = new ArrayList<>();
 
     @Nullable
     @Override
@@ -39,6 +46,18 @@ public class RecommendationsFragment extends Fragment {
         viewModel = new ViewModelProvider(this).get(RecommendationsViewModel.class);
 
         adapter = new MovieAdapter();
+
+        adapter.setOnDismissListener(movie -> {
+            int position = shown.indexOf(movie);
+            viewModel.dismiss(movie);
+
+            Snackbar snackbar = Snackbar.make(binding.getRoot(),
+                            "Uklonjeno iz preporuka", Snackbar.LENGTH_LONG)
+                    .setAction("Poništi", v -> viewModel.undoDismiss(movie, position));
+            View nav = requireActivity().findViewById(R.id.bottomNav);
+            if (nav != null) snackbar.setAnchorView(nav);
+            snackbar.show();
+        });
         binding.recyclerRecommendations.setLayoutManager(new GridLayoutManager(requireContext(), new AppSettings(requireContext()).getGridColumns()));
         binding.recyclerRecommendations.setAdapter(adapter);
 
@@ -51,6 +70,7 @@ public class RecommendationsFragment extends Fragment {
         binding.btnRefresh.setOnClickListener(v -> viewModel.load());
 
         viewModel.getRecommendations().observe(getViewLifecycleOwner(), movies -> {
+            shown = new ArrayList<>(movies);
             adapter.setMovies(movies);
             binding.tvMessage.setText(
                     "Još nema preporuka. Dodaj nekoliko filmova u favorite ili na listu za gledanje.");

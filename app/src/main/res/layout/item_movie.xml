@@ -18,7 +18,7 @@
             android:id="@+id/imgPoster"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:contentDescription="Poster filma"
+            android:contentDescription="@string/cd_poster"
             android:scaleType="centerCrop"
             app:layout_constraintDimensionRatio="H,2:3"
             app:layout_constraintEnd_toEndOf="parent"
@@ -57,7 +57,7 @@
                 android:layout_height="26dp"
                 android:layout_marginEnd="4dp"
                 android:background="@drawable/bg_circle_dark"
-                android:contentDescription="Favorit"
+                android:contentDescription="@string/cd_favorite"
                 android:padding="5dp"
                 android:src="@drawable/ic_heart"
                 android:visibility="gone"
@@ -69,7 +69,7 @@
                 android:layout_height="26dp"
                 android:layout_marginEnd="4dp"
                 android:background="@drawable/bg_circle_dark"
-                android:contentDescription="Za gledanje"
+                android:contentDescription="@string/list_watchlist"
                 android:padding="5dp"
                 android:src="@drawable/ic_bookmark"
                 android:visibility="gone"
@@ -81,12 +81,26 @@
                 android:layout_height="26dp"
                 android:layout_marginEnd="4dp"
                 android:background="@drawable/bg_circle_dark"
-                android:contentDescription="Pogledano"
+                android:contentDescription="@string/list_watched"
                 android:padding="5dp"
                 android:src="@drawable/ic_check"
                 android:visibility="gone"
                 app:tint="@color/cinevo_check" />
         </LinearLayout>
+
+        <ImageButton
+            android:id="@+id/btnDismiss"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_margin="8dp"
+            android:background="@drawable/bg_circle_dark"
+            android:contentDescription="@string/dismiss"
+            android:padding="7dp"
+            android:src="@drawable/ic_close"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@id/imgPoster"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:tint="@color/white" />
 
         <TextView
             android:id="@+id/tvTitle"
@@ -108,17 +122,33 @@
             android:id="@+id/tvYear"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
             android:paddingStart="10dp"
             android:paddingTop="2dp"
             android:paddingEnd="10dp"
             android:paddingBottom="12dp"
             android:textColor="?attr/colorOnSurfaceVariant"
             android:textSize="12sp"
-            android:ellipsize="end"
-            android:maxLines="1"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tvTitle" />
+
+        <TextView
+            android:id="@+id/tvReason"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="2"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:paddingBottom="12dp"
+            android:textColor="?attr/colorPrimary"
+            android:textSize="11sp"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvYear" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>

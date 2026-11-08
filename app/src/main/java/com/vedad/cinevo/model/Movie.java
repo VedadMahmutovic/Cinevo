@@ -50,6 +50,12 @@ public class Movie {
         this.genreIds = genreIds;
     }
 
+    private transient String reason;
+
+    public String getReason() { return reason; }
+
+    public void setReason(String reason) { this.reason = reason; }
+
     public Movie() {
     }
     public Movie(int id, String title, String overview, String posterPath,

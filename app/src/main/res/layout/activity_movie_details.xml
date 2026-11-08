@@ -25,7 +25,7 @@
                     android:id="@+id/imgBackdrop"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:contentDescription="Slika filma"
+                    android:contentDescription="@string/cd_backdrop"
                     android:scaleType="centerCrop" />
 
                 <View
@@ -59,7 +59,7 @@
                         android:id="@+id/imgPoster"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:contentDescription="Poster filma"
+                        android:contentDescription="@string/cd_poster"
                         android:scaleType="centerCrop" />
                 </com.google.android.material.card.MaterialCardView>
 
@@ -142,7 +142,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="4dp"
                     android:layout_weight="1"
-                    android:text="♡ Favorit" />
+                    android:text="@string/favorite_add" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnWatchlist"
@@ -151,7 +151,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="4dp"
                     android:layout_weight="1"
-                    android:text="+ Za gledanje" />
+                    android:text="@string/watchlist_add" />
             </LinearLayout>
 
             <com.google.android.material.button.MaterialButton
@@ -161,7 +161,7 @@
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="16dp"
-                android:text="Pogledaj trailer"
+                android:text="@string/trailer_watch"
                 android:visibility="gone" />
 
             <FrameLayout
@@ -179,7 +179,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
-                android:text="Otvori u YouTubeu"
+                android:text="@string/trailer_open_youtube"
                 android:visibility="gone" />
 
             <com.google.android.material.card.MaterialCardView
@@ -205,7 +205,7 @@
                         android:id="@+id/tvRatingHint"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Ocijeni film"
+                        android:text="@string/rate_movie"
                         android:textColor="?attr/colorOnSurface"
                         android:textSize="15sp"
                         android:textStyle="bold" />
@@ -221,7 +221,7 @@
                         style="?attr/borderlessButtonStyle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Ukloni ocjenu"
+                        android:text="@string/rating_remove"
                         android:visibility="gone" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -232,7 +232,7 @@
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="24dp"
                 android:layout_marginEnd="16dp"
-                android:text="Opis"
+                android:text="@string/overview"
                 android:textColor="?attr/colorOnSurface"
                 android:textSize="18sp"
                 android:textStyle="bold" />
@@ -268,7 +268,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Glumci"
+                        android:text="@string/cast"
                         android:textColor="?attr/colorOnSurface"
                         android:textSize="18sp"
                         android:textStyle="bold" />
@@ -278,7 +278,7 @@
                         style="?attr/borderlessButtonStyle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Pogledaj sve"
+                        android:text="@string/view_all"
                         android:visibility="gone" />
                 </LinearLayout>
 
@@ -307,7 +307,7 @@
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="24dp"
                     android:layout_marginEnd="16dp"
-                    android:text="Gdje gledati"
+                    android:text="@string/where_to_watch"
                     android:textColor="?attr/colorOnSurface"
                     android:textSize="18sp"
                     android:textStyle="bold" />
@@ -335,7 +335,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="16dp"
                         android:layout_marginTop="12dp"
-                        android:text="Streaming"
+                        android:text="@string/providers_stream"
                         android:textColor="?attr/colorOnSurface"
                         android:textSize="14sp"
                         android:textStyle="bold" />
@@ -361,7 +361,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="16dp"
                         android:layout_marginTop="12dp"
-                        android:text="Iznajmljivanje"
+                        android:text="@string/providers_rent"
                         android:textColor="?attr/colorOnSurface"
                         android:textSize="14sp"
                         android:textStyle="bold" />
@@ -387,7 +387,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="16dp"
                         android:layout_marginTop="12dp"
-                        android:text="Kupovina"
+                        android:text="@string/providers_buy"
                         android:textColor="?attr/colorOnSurface"
                         android:textSize="14sp"
                         android:textStyle="bold" />
@@ -408,7 +408,7 @@
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="8dp"
                     android:layout_marginEnd="16dp"
-                    android:text="Nema podataka o dostupnosti za odabranu državu. Državu možeš promijeniti u postavkama."
+                    android:text="@string/watch_empty"
                     android:textColor="?attr/colorOnSurfaceVariant"
                     android:textSize="14sp"
                     android:visibility="gone" />
@@ -419,7 +419,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
-                    android:text="Prikaži sve opcije"
+                    android:text="@string/watch_all_options"
                     android:visibility="gone" />
 
                 <TextView
@@ -428,7 +428,7 @@
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="2dp"
                     android:layout_marginEnd="16dp"
-                    android:text="Podaci o dostupnosti: JustWatch"
+                    android:text="@string/watch_attribution"
                     android:textColor="?attr/colorOnSurfaceVariant"
                     android:textSize="11sp" />
             </LinearLayout>
@@ -446,7 +446,7 @@
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="24dp"
                     android:layout_marginEnd="16dp"
-                    android:text="Slični filmovi"
+                    android:text="@string/similar_movies"
                     android:textColor="?attr/colorOnSurface"
                     android:textSize="18sp"
                     android:textStyle="bold" />
@@ -473,7 +473,7 @@
         android:layout_marginStart="12dp"
         android:layout_marginTop="40dp"
         android:background="@drawable/bg_circle_dark"
-        android:contentDescription="Nazad"
+        android:contentDescription="@string/back"
         android:src="@drawable/ic_back"
         app:tint="@color/white" />
 
@@ -507,7 +507,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:text="Pokušaj ponovo" />
+            android:text="@string/retry" />
     </LinearLayout>
 
 </FrameLayout>

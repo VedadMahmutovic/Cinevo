@@ -25,6 +25,9 @@ import retrofit2.Response;
 
 public class HomeViewModel extends ViewModel {
 
+    private static final String LANGUAGE = "en-US";
+    private static final int TMDB_MAX_PAGES = 500;
+
     public static class StateMessage {
         public final String text;
         public final boolean retryable;
@@ -35,13 +38,9 @@ public class HomeViewModel extends ViewModel {
         }
     }
 
-    private static final String LANGUAGE = "en-US";
-    private static final int TMDB_MAX_PAGES = 500;
+    public enum Feed { POPULAR, NOW_PLAYING, UPCOMING, TOP_RATED }
 
     private final TmdbApi api = RetrofitClient.getApi();
-    private Parcelable listState;
-    public Parcelable getListState() { return listState; }
-    public void setListState(Parcelable state) { this.listState = state; }
 
     private final MutableLiveData<List<Movie>> movies = new MutableLiveData<>(new ArrayList<>());
     private final MutableLiveData<Boolean> loading = new MutableLiveData<>(false);
@@ -49,20 +48,25 @@ public class HomeViewModel extends ViewModel {
     private final MutableLiveData<StateMessage> stateMessage = new MutableLiveData<>();
     private final MutableLiveData<String> queryLive = new MutableLiveData<>("");
     private final MutableLiveData<MovieFilter> filterLive = new MutableLiveData<>(new MovieFilter());
-
+    private final MutableLiveData<Feed> feedLive = new MutableLiveData<>(Feed.POPULAR);
     private final MutableLiveData<List<PersonSearchResponse.Person>> people =
             new MutableLiveData<>(new ArrayList<>());
-    private Call<PersonSearchResponse> peopleCall;
 
     private final List<Movie> allMovies = new ArrayList<>();
     private final Set<Integer> seenIds = new HashSet<>();
 
     private String query = "";
     private MovieFilter filter = new MovieFilter();
+    private Feed feed = Feed.POPULAR;
+
     private int page = 0;
     private int totalPages = 1;
     private boolean isLoading = false;
+
     private Call<MovieResponse> currentCall;
+    private Call<PersonSearchResponse> peopleCall;
+
+    private Parcelable listState;
 
     public LiveData<List<Movie>> getMovies() { return movies; }
     public LiveData<Boolean> getLoading() { return loading; }
@@ -70,82 +74,26 @@ public class HomeViewModel extends ViewModel {
     public LiveData<StateMessage> getStateMessage() { return stateMessage; }
     public LiveData<String> getQueryLive() { return queryLive; }
     public LiveData<MovieFilter> getFilterLive() { return filterLive; }
+    public LiveData<Feed> getFeedLive() { return feedLive; }
     public LiveData<List<PersonSearchResponse.Person>> getPeople() { return people; }
+
+    public Feed getFeed() { return feed; }
 
     public MovieFilter getFilter() {
         return filter.copy();
     }
 
-    public void clearMessage() {
-        message.setValue(null);
+    public Parcelable getListState() { return listState; }
+    public void setListState(Parcelable state) { this.listState = state; }
+
+    public boolean isCustomResults() {
+        return !query.isEmpty() || filter.isActive();
     }
 
     public void loadFirstPageIfNeeded() {
         if (page == 0 && !isLoading) {
             loadNextPage();
         }
-    }
-    public void retry() {
-        stateMessage.setValue(null);
-        loadNextPage();
-    }
-
-    public void setQuery(String newQuery) {
-        String q = newQuery == null ? "" : newQuery.trim();
-        if (q.equals(query)) return;
-        query = q;
-        queryLive.setValue(q);
-        reload();
-    }
-
-    public void applyFilter(MovieFilter newFilter) {
-        filter = newFilter.copy();
-        filterLive.setValue(filter.copy());
-        query = "";
-        queryLive.setValue("");
-        reload();
-    }
-
-    public void setSort(String sortBy) {
-        if (filter.sortBy.equals(sortBy)) return;
-        filter.sortBy = sortBy;
-        filterLive.setValue(filter.copy());
-        query = "";
-        queryLive.setValue("");
-        reload();
-    }
-
-    public void clearFilters() {
-        MovieFilter cleared = new MovieFilter();
-        cleared.sortBy = filter.sortBy;
-        applyFilter(cleared);
-    }
-
-    private void reload() {
-        if (peopleCall != null) peopleCall.cancel();
-        people.setValue(new ArrayList<>());
-        if (currentCall != null) currentCall.cancel();
-        allMovies.clear();
-        seenIds.clear();
-        movies.setValue(new ArrayList<>());
-        stateMessage.setValue(null);
-        page = 0;
-        totalPages = 1;
-        isLoading = false;
-        loading.setValue(false);
-        loadNextPage();
-        if (!query.isEmpty()) loadPeople();
-    }
-
-    private Call<MovieResponse> buildCall(int pageNumber) {
-        String key = BuildConfig.TMDB_API_KEY;
-        if (!query.isEmpty()) {
-            return api.searchMovies(key, LANGUAGE, query, pageNumber);
-        }
-        if (filter.isActive()) {
-            return api.discoverWithFilters(key, LANGUAGE, filter.toQueryMap(), pageNumber);
-        }
-        return api.getPopularMovies(key, LANGUAGE, pageNumber);
     }
 
     public void loadNextPage() {
@@ -199,6 +147,95 @@ public class HomeViewModel extends ViewModel {
                 reportError("Nema veze s internetom");
             }
         });
+    }
+
+    public void retry() {
+        stateMessage.setValue(null);
+        loadNextPage();
+    }
+
+    public void setQuery(String newQuery) {
+        String q = newQuery == null ? "" : newQuery.trim();
+        if (q.equals(query)) return;
+        query = q;
+        queryLive.setValue(q);
+        reload();
+    }
+
+    public void applyFilter(MovieFilter newFilter) {
+        filter = newFilter.copy();
+        filterLive.setValue(filter.copy());
+        query = "";
+        queryLive.setValue("");
+        reload();
+    }
+
+    public void clearFilters() {
+        MovieFilter cleared = new MovieFilter();
+        cleared.sortBy = filter.sortBy;
+        applyFilter(cleared);
+    }
+
+    public void setFeed(Feed newFeed) {
+        if (feed == newFeed && !isCustomResults()) return;
+
+        feed = newFeed;
+        filter = new MovieFilter();
+        query = "";
+
+        feedLive.setValue(feed);
+        filterLive.setValue(filter.copy());
+        queryLive.setValue("");
+        reload();
+    }
+
+    public void setSort(String sortBy) {
+        if (filter.sortBy.equals(sortBy)) return;
+        filter.sortBy = sortBy;
+        filterLive.setValue(filter.copy());
+        query = "";
+        queryLive.setValue("");
+        reload();
+    }
+
+    public void clearMessage() {
+        message.setValue(null);
+    }
+
+    private void reload() {
+        if (peopleCall != null) peopleCall.cancel();
+        people.setValue(new ArrayList<>());
+        if (currentCall != null) currentCall.cancel();
+        allMovies.clear();
+        seenIds.clear();
+        movies.setValue(new ArrayList<>());
+        stateMessage.setValue(null);
+        page = 0;
+        totalPages = 1;
+        isLoading = false;
+        loading.setValue(false);
+        loadNextPage();
+        if (!query.isEmpty()) loadPeople();
+    }
+
+    private Call<MovieResponse> buildCall(int pageNumber) {
+        String key = BuildConfig.TMDB_API_KEY;
+        if (!query.isEmpty()) {
+            return api.searchMovies(key, LANGUAGE, query, pageNumber);
+        }
+        if (filter.isActive()) {
+            return api.discoverWithFilters(key, LANGUAGE, filter.toQueryMap(), pageNumber);
+        }
+        switch (feed) {
+            case NOW_PLAYING:
+                return api.getNowPlaying(key, LANGUAGE, pageNumber);
+            case UPCOMING:
+                return api.getUpcoming(key, LANGUAGE, pageNumber);
+            case TOP_RATED:
+                return api.getTopRated(key, LANGUAGE, pageNumber);
+            default:
+                return api.getPopularMovies(key, LANGUAGE, pageNumber);
+        }
     }
 
     private void loadPeople() {

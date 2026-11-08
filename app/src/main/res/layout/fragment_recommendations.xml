@@ -24,7 +24,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Za tebe"
+                android:text="@string/for_you"
                 android:textColor="?attr/colorOnSurface"
                 android:textSize="28sp"
                 android:textStyle="bold" />
@@ -33,7 +33,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
-                android:text="Na osnovu tvojih favorita i ocjena"
+                android:text="@string/for_you_subtitle"
                 android:textColor="?attr/colorOnSurfaceVariant"
                 android:textSize="13sp" />
         </LinearLayout>
@@ -43,7 +43,7 @@
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Osvježi"
+            android:contentDescription="@string/refresh"
             android:src="@drawable/ic_refresh"
             app:tint="?attr/colorOnSurface" />
     </LinearLayout>

@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <PreferenceCategory
-        android:title="IZGLED"
+        android:title="@string/pref_cat_appearance"
         app:iconSpaceReserved="false">
         <ListPreference
             android:defaultValue="system"
@@ -12,20 +12,20 @@
             android:entryValues="@array/theme_values"
             android:icon="@drawable/ic_palette"
             android:key="pref_theme"
-            android:title="Tema"
+            android:title="@string/pref_theme_title"
             app:useSimpleSummaryProvider="true" />
     </PreferenceCategory>
 
     <PreferenceCategory
-        android:title="PREPORUKE"
+        android:title="@string/pref_cat_recommendations"
         app:iconSpaceReserved="false">
         <SeekBarPreference
             android:defaultValue="6"
             android:icon="@drawable/ic_tune"
             android:key="pref_min_rating"
             android:max="9"
-            android:summary="Preporuke ispod ove ocjene se ne prikazuju"
-            android:title="Minimalna ocjena"
+            android:summary="@string/pref_min_rating_summary"
+            android:title="@string/pref_min_rating_title"
             app:min="0"
             app:showSeekBarValue="true" />
 
@@ -34,25 +34,25 @@
             android:icon="@drawable/ic_tune"
             android:key="pref_min_votes"
             android:max="1000"
-            android:summary="Filmovi s manje glasova se ne preporučuju"
-            android:title="Minimalan broj glasova"
+            android:summary="@string/pref_min_votes_summary"
+            android:title="@string/pref_min_votes_title"
             app:min="0"
             app:seekBarIncrement="50"
             app:showSeekBarValue="true" />
     </PreferenceCategory>
 
     <PreferenceCategory
-        android:title="PODACI"
+        android:title="@string/pref_cat_data"
         app:iconSpaceReserved="false">
         <Preference
             android:icon="@drawable/ic_delete"
             android:key="pref_clear_saved"
-            android:summary="Briše sve favorite i listu za gledanje"
-            android:title="Obriši spremljene filmove" />
+            android:summary="@string/pref_clear_summary"
+            android:title="@string/pref_clear_title" />
     </PreferenceCategory>
 
     <PreferenceCategory
-        android:title="SADRŽAJ"
+        android:title="@string/pref_cat_content"
         app:iconSpaceReserved="false">
         <ListPreference
             android:defaultValue="BA"
@@ -60,17 +60,17 @@
             android:entryValues="@array/region_values"
             android:icon="@drawable/ic_public"
             android:key="pref_watch_region"
-            android:title="Država za dostupnost filmova"
+            android:title="@string/pref_region_title"
             app:useSimpleSummaryProvider="true" />
     </PreferenceCategory>
 
     <PreferenceCategory
-        android:title="OSTALO"
+        android:title="@string/pref_cat_other"
         app:iconSpaceReserved="false">
         <Preference
             android:icon="@drawable/ic_info"
             android:key="pref_about"
-            android:title="O aplikaciji" />
+            android:title="@string/pref_about_title" />
     </PreferenceCategory>
 
 </PreferenceScreen>

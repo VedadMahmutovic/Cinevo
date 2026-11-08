@@ -1,3 +1,141 @@
 <resources>
     <string name="app_name">Cinevo</string>
+
+    <string name="retry">Pokušaj ponovo</string>
+    <string name="settings">Postavke</string>
+    <string name="back">Nazad</string>
+    <string name="search">Pretraga</string>
+    <string name="search_hint">Pretraži filmove</string>
+    <string name="clear_text">Obriši tekst</string>
+    <string name="refresh">Osvježi</string>
+    <string name="columns">Broj kolona</string>
+    <string name="ok">U redu</string>
+    <string name="cancel">Odustani</string>
+    <string name="delete">Obriši</string>
+    <string name="undo">Poništi</string>
+
+    <string name="nav_home">Početna</string>
+    <string name="my_movies">Moji filmovi</string>
+    <string name="for_you">Za tebe</string>
+    <string name="for_you_subtitle">Na osnovu tvojih favorita i ocjena</string>
+    <string name="list_favorites">Favoriti</string>
+    <string name="list_watchlist">Za gledanje</string>
+    <string name="list_watched">Pogledano</string>
+    <string name="people">Osobe</string>
+
+    <string name="feed_popular">Popularno</string>
+    <string name="feed_now_playing">U kinima</string>
+    <string name="feed_upcoming">Uskoro</string>
+    <string name="feed_top_rated">Najbolje ocijenjeni</string>
+    <string name="filters">Filteri</string>
+    <string name="filters_count">Filteri · %1$d</string>
+    <string name="sort_chip_default">Popularno ▾</string>
+    <string name="sort_chip_format">%1$s ▾</string>
+    <string name="sort_popularity">Popularnost</string>
+    <string name="sort_rating">Ocjena</string>
+    <string name="sort_date_desc">Najnoviji prvo</string>
+    <string name="sort_date_asc">Najstariji prvo</string>
+    <string name="sort_short_popularity">Popularno</string>
+    <string name="sort_short_rating">Ocjena</string>
+    <string name="sort_short_newest">Najnovije</string>
+    <string name="sort_short_oldest">Najstarije</string>
+    <string name="dismiss">Ne zanima me</string>
+    <string name="rating_badge_new">Novo</string>
+
+    <string name="genre">Žanr</string>
+    <string name="reset">Resetuj</string>
+    <string name="apply">Primijeni</string>
+
+    <string name="favorite_add">♡ Favorit</string>
+    <string name="favorite_added">♥ U favoritima</string>
+    <string name="watchlist_add">+ Za gledanje</string>
+    <string name="watchlist_added">✓ Na listi</string>
+    <string name="trailer_watch">Pogledaj trailer</string>
+    <string name="trailer_hide">Sakrij trailer</string>
+    <string name="trailer_open_youtube">Otvori u YouTubeu</string>
+    <string name="rate_movie">Ocijeni film</string>
+    <string name="rating_hint_set">Tvoja ocjena: %1$s/5</string>
+    <string name="rating_remove">Ukloni ocjenu</string>
+    <string name="overview">Opis</string>
+    <string name="cast">Glumci</string>
+    <string name="cast_count">Glumci (%1$d)</string>
+    <string name="view_all">Pogledaj sve</string>
+    <string name="view_all_count">Pogledaj sve (%1$d)</string>
+    <string name="directed_by">Režija: %1$s</string>
+    <string name="choose_director">Izaberi reditelja</string>
+    <string name="where_to_watch">Gdje gledati</string>
+    <string name="where_to_watch_region">Gdje gledati (%1$s)</string>
+    <string name="change_region_hint">Promijeni državu u postavkama</string>
+    <string name="providers_stream">Streaming</string>
+    <string name="providers_rent">Iznajmljivanje</string>
+    <string name="providers_buy">Kupovina</string>
+    <string name="watch_empty">Nema podataka o dostupnosti za odabranu državu. Državu možeš promijeniti u postavkama.</string>
+    <string name="watch_all_options">Prikaži sve opcije</string>
+    <string name="watch_attribution">Podaci o dostupnosti: JustWatch</string>
+    <string name="similar_movies">Slični filmovi</string>
+
+    <string name="role_director">Reditelj</string>
+    <string name="role_actor">Glumac</string>
+    <string name="person_directed">Režirani filmovi</string>
+    <string name="person_known_roles">Najpoznatije uloge</string>
+    <string name="person_no_movies">Nema pronađenih filmova.</string>
+
+    <string name="rec_removed">Uklonjeno iz preporuka</string>
+    <string name="rec_empty">Još nema preporuka. Dodaj nekoliko filmova u favorite ili na listu za gledanje.</string>
+    <string name="rec_error_retry">%1$s. Dodirni Osvježi da pokušaš ponovo.</string>
+    <string name="empty_favorites">Još nemaš favorita.</string>
+    <string name="empty_watchlist">Lista za gledanje je prazna.</string>
+    <string name="empty_watched">Još nisi ocijenio nijedan film.</string>
+
+    <string name="error_no_internet">Nema veze s internetom</string>
+    <string name="error_loading_code">Greška pri učitavanju (%1$d)</string>
+    <string name="error_loading_movie_code">Greška pri učitavanju filma (%1$d)</string>
+    <string name="no_movies_for_query">Nema filmova za: %1$s</string>
+    <string name="no_movies_for_filters">Nema filmova za odabrane filtere</string>
+
+    <string name="pref_cat_appearance">IZGLED</string>
+    <string name="pref_cat_recommendations">PREPORUKE</string>
+    <string name="pref_cat_data">PODACI</string>
+    <string name="pref_cat_content">SADRŽAJ</string>
+    <string name="pref_cat_other">OSTALO</string>
+    <string name="pref_theme_title">Tema</string>
+    <string name="pref_min_rating_title">Minimalna ocjena</string>
+    <string name="pref_min_rating_summary">Preporuke ispod ove ocjene se ne prikazuju</string>
+    <string name="pref_min_votes_title">Minimalan broj glasova</string>
+    <string name="pref_min_votes_summary">Filmovi s manje glasova se ne preporučuju</string>
+    <string name="pref_clear_title">Obriši spremljene filmove</string>
+    <string name="pref_clear_summary">Briše sve favorite i listu za gledanje</string>
+    <string name="pref_region_title">Država za dostupnost filmova</string>
+    <string name="pref_about_title">O aplikaciji</string>
+    <string name="clear_dialog_title">Obriši spremljene filmove?</string>
+    <string name="clear_dialog_message">Svi favoriti i filmovi s liste za gledanje bit će obrisani. Ovo se ne može poništiti.</string>
+    <string name="cleared_toast">Spremljeni filmovi su obrisani</string>
+
+    <string name="theme_system">Prema sistemu</string>
+    <string name="theme_light">Svijetla</string>
+    <string name="theme_dark">Tamna</string>
+
+    <string name="region_ba">Bosna i Hercegovina</string>
+    <string name="region_hr">Hrvatska</string>
+    <string name="region_rs">Srbija</string>
+    <string name="region_si">Slovenija</string>
+    <string name="region_me">Crna Gora</string>
+    <string name="region_mk">Sjeverna Makedonija</string>
+    <string name="region_de">Njemačka</string>
+    <string name="region_at">Austrija</string>
+    <string name="region_gb">Ujedinjeno Kraljevstvo</string>
+    <string name="region_us">SAD</string>
+
+    <string name="about_description">Cinevo je aplikacija za pregled i preporuku filmova, nastala u sklopu završnog rada.</string>
+    <string name="about_tmdb">This product uses the TMDB API but is not endorsed or certified by TMDB.</string>
+    <string name="about_version">Verzija 1.0</string>
+
+    <string name="cd_poster">Poster filma</string>
+    <string name="cd_favorite">Favorit</string>
+    <string name="cd_backdrop">Slika filma</string>
+    <string name="cd_empty_list">Prazna lista</string>
+    <string name="cd_cast_photo">Fotografija glumca</string>
+    <string name="cd_photo">Fotografija</string>
+    <string name="cd_provider">Servis</string>
+    <string name="cd_tmdb_logo">TMDB logo</string>
 </resources>

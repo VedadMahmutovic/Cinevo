@@ -14,6 +14,7 @@ import com.vedad.cinevo.model.Movie;
 import com.vedad.cinevo.model.MovieDetails;
 import com.vedad.cinevo.model.MovieResponse;
 import com.vedad.cinevo.model.PersonCredits;
+import com.vedad.cinevo.model.PersonSearchResponse;
 import com.vedad.cinevo.recommendation.RecommendationEngine;
 import com.vedad.cinevo.util.AppSettings;
 
@@ -61,6 +62,8 @@ public class RecommendationRepository {
         Map<Integer, Double> profile = RecommendationEngine.buildProfile(saved);
         Map<Integer, Movie> candidates = new LinkedHashMap<>();
         Map<Integer, Integer> recCounts = new HashMap<>();
+        Map<Integer, List<String>> becauseOf = new HashMap<>();
+        Map<Integer, String> directorOfMovie = new HashMap<>();
         Set<Integer> directorMatchIds = new HashSet<>();
         Set<Integer> excludeIds = new HashSet<>();
 
@@ -92,6 +95,7 @@ public class RecommendationRepository {
                     if (!RecommendationEngine.isQualityCandidate(m, minRating, minVotes)) continue;
                     candidates.putIfAbsent(m.getId(), m);
                     recCounts.merge(m.getId(), 1, Integer::sum);
+                    becauseOf.computeIfAbsent(m.getId(), k -> new ArrayList<>()).add(s.title);
                 }
             }
         }
@@ -99,6 +103,13 @@ public class RecommendationRepository {
         List<Integer> favoriteDirectors = RecommendationEngine.topDirectors(
                 RecommendationEngine.buildDirectorProfile(saved), MAX_DIRECTORS);
         for (int directorId : favoriteDirectors) {
+            String directorName = null;
+            Response<PersonSearchResponse.Person> personResponse = api.getPerson(
+                    directorId, BuildConfig.TMDB_API_KEY, LANGUAGE).execute();
+            if (personResponse.isSuccessful() && personResponse.body() != null) {
+                directorName = personResponse.body().getName();
+            }
+
             Response<PersonCredits> response = api.getPersonMovieCredits(
                     directorId, BuildConfig.TMDB_API_KEY, LANGUAGE).execute();
             if (!response.isSuccessful() || response.body() == null
@@ -110,6 +121,7 @@ public class RecommendationRepository {
                 if (!RecommendationEngine.isQualityCandidate(m, minRating, minVotes)) continue;
                 candidates.putIfAbsent(m.getId(), m);
                 directorMatchIds.add(m.getId());
+                if (directorName != null) directorOfMovie.putIfAbsent(m.getId(), directorName);
             }
         }
 
@@ -118,11 +130,13 @@ public class RecommendationRepository {
                 excludeIds, RESULT_LIMIT);
 
         List<Movie> result = new ArrayList<>();
-        for (RecommendationEngine.ScoredMovie s : ranked) {
-            result.add(s.movie);
-            Log.d(TAG, String.format(Locale.US, "REC %s -> score %.3f%s",
-                    s.movie.getTitle(), s.score,
-                    directorMatchIds.contains(s.movie.getId()) ? " [reditelj]" : ""));
+        for (RecommendationEngine.ScoredMovie scored : ranked) {
+            Movie m = scored.movie;
+            m.setReason(RecommendationEngine.explain(m, profile,
+                    becauseOf.get(m.getId()), directorOfMovie.get(m.getId())));
+            result.add(m);
+            Log.d(TAG, String.format(Locale.US, "REC %s -> score %.3f | %s",
+                    m.getTitle(), scored.score, m.getReason()));
         }
         return result;
     }
@@ -133,6 +147,7 @@ public class RecommendationRepository {
 
         for (SavedMovie s : saved) {
             if (s.directorIds != null) continue;
+            if (SavedMovie.DISMISSED.equals(s.listType)) continue;
 
             String ids = fetched.get(s.id);
             if (ids == null) {

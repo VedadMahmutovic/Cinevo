@@ -78,4 +78,32 @@ public interface TmdbApi {
             @Query("query") String query,
             @Query("page") int page
     );
+
+    @GET("person/{person_id}")
+    Call<PersonSearchResponse.Person> getPerson(
+            @Path("person_id") int personId,
+            @Query("api_key") String apiKey,
+            @Query("language") String language
+    );
+
+    @GET("movie/now_playing")
+    Call<MovieResponse> getNowPlaying(
+            @Query("api_key") String apiKey,
+            @Query("language") String language,
+            @Query("page") int page
+    );
+
+    @GET("movie/upcoming")
+    Call<MovieResponse> getUpcoming(
+            @Query("api_key") String apiKey,
+            @Query("language") String language,
+            @Query("page") int page
+    );
+
+    @GET("movie/top_rated")
+    Call<MovieResponse> getTopRated(
+            @Query("api_key") String apiKey,
+            @Query("language") String language,
+            @Query("page") int page
+    );
 }

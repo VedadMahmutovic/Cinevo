@@ -290,4 +290,47 @@ public class RecommendationEngineTest {
         assertEquals(RecommendationEngine.W_DIRECTOR,
                 ranked.get(0).score - ranked.get(1).score, DELTA);
     }
+
+    @Test
+    public void weightOf_dismissedIsSlightlyNegative() {
+        SavedMovie dismissed = saved(1, SavedMovie.DISMISSED, "35");
+
+        assertEquals(-0.25, RecommendationEngine.weightOf(dismissed), DELTA);
+        assertEquals(-0.25, RecommendationEngine.buildProfile(
+                Arrays.asList(dismissed)).get(35), DELTA);
+    }
+
+    @Test
+    public void explain_mentionsSeedFilmThenGenre() {
+        Map<Integer, Double> profile = profileOf(27, 1.0);
+
+        assertEquals("Jer ti se sviđa Hateful Eight • Žanr: Horor",
+                RecommendationEngine.explain(movie(1, 7.0, 27), profile,
+                        Arrays.asList("Hateful Eight"), null));
+    }
+
+    @Test
+    public void explain_countsAdditionalSeeds() {
+        Map<Integer, Double> profile = profileOf(27, 1.0);
+
+        assertEquals("Jer ti se sviđa A i još 2 • Žanr: Horor",
+                RecommendationEngine.explain(movie(1, 7.0, 27), profile,
+                        Arrays.asList("A", "B", "C"), null));
+    }
+
+    @Test
+    public void explain_directorComesBeforeGenres() {
+        Map<Integer, Double> profile = profileOf(27, 1.0, 53, 0.5);
+
+        assertEquals("Režija: Quentin Tarantino • Žanr: Horor, Triler",
+                RecommendationEngine.explain(movie(1, 7.0, 27, 53), profile,
+                        null, "Quentin Tarantino"));
+    }
+
+    @Test
+    public void explain_fallsBackToRating() {
+        assertEquals("Visoko ocijenjen (7.8)",
+                RecommendationEngine.explain(movie(1, 7.8, 99),
+                        new HashMap<Integer, Double>(), null, null));
+    }
 }

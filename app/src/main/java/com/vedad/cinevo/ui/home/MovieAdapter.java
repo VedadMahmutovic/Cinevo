@@ -38,6 +38,8 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
     private static final int FLAG_WATCHLIST = 2;
     private static final int FLAG_WATCHED = 4;
 
+    private OnMovieClickListener dismissListener;
+
     public interface OnMovieClickListener {
         void onMovieClick(Movie movie);
     }
@@ -62,7 +64,8 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
                 int flag;
                 if (SavedMovie.FAVORITE.equals(s.listType)) flag = FLAG_FAVORITE;
                 else if (SavedMovie.WATCHLIST.equals(s.listType)) flag = FLAG_WATCHLIST;
-                else flag = FLAG_WATCHED;
+                else if (SavedMovie.WATCHED.equals(s.listType)) flag = FLAG_WATCHED;
+                else continue;
 
                 Integer current = statusFlags.get(s.id);
                 statusFlags.put(s.id, (current == null ? 0 : current) | flag);
@@ -170,6 +173,20 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
 
         bindStatus(holder, movie.getId());
 
+        String reason = movie.getReason();
+        boolean hasReason = reason != null && !reason.isEmpty();
+        holder.binding.tvReason.setText(hasReason ? reason : "");
+        holder.binding.tvReason.setVisibility(hasReason ? View.VISIBLE : View.GONE);
+
+        float density = holder.binding.getRoot().getResources().getDisplayMetrics().density;
+        holder.binding.tvYear.setPadding((int) (10 * density), (int) (2 * density),
+                (int) (10 * density), (int) ((hasReason ? 2 : 12) * density));
+
+        holder.binding.btnDismiss.setVisibility(dismissListener != null ? View.VISIBLE : View.GONE);
+        holder.binding.btnDismiss.setOnClickListener(v -> {
+            if (dismissListener != null) dismissListener.onMovieClick(movie);
+        });
+
         String url = movie.getPosterPath() != null
                 ? IMAGE_BASE_URL + movie.getPosterPath()
                 : null;
@@ -224,5 +241,9 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
             super(binding.getRoot());
             this.binding = binding;
         }
+    }
+
+    public void setOnDismissListener(OnMovieClickListener listener) {
+        this.dismissListener = listener;
     }
 }

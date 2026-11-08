@@ -47,6 +47,7 @@ public class HomeFragment extends Fragment {
     private MovieAdapter adapter;
     private GridLayoutManager layoutManager;
     private boolean isLoadingNow = false;
+    private boolean updatingFeedChips = false;
 
     private final Handler searchHandler = new Handler(Looper.getMainLooper());
     private Runnable pendingSearch;
@@ -225,6 +226,24 @@ public class HomeFragment extends Fragment {
         });
 
         binding.btnRetry.setOnClickListener(v -> viewModel.retry());
+
+        binding.chipFeeds.setOnCheckedStateChangeListener((group, checkedIds) -> {
+            if (updatingFeedChips) return;
+            if (checkedIds.isEmpty()) {
+                refreshFeedChips();
+                return;
+            }
+            int id = checkedIds.get(0);
+            if (id == R.id.chipFeedNowPlaying) {
+                viewModel.setFeed(HomeViewModel.Feed.NOW_PLAYING);
+            } else if (id == R.id.chipFeedUpcoming) {
+                viewModel.setFeed(HomeViewModel.Feed.UPCOMING);
+            } else if (id == R.id.chipFeedTopRated) {
+                viewModel.setFeed(HomeViewModel.Feed.TOP_RATED);
+            } else {
+                viewModel.setFeed(HomeViewModel.Feed.POPULAR);
+            }
+        });
     }
 
     private void openFilters() {
@@ -237,6 +256,7 @@ public class HomeFragment extends Fragment {
                 binding.editSearch.setText(text);
                 binding.editSearch.setSelection(text.length());
             }
+            refreshFeedChips();
         });
 
         viewModel.getFilterLive().observe(getViewLifecycleOwner(), f -> {
@@ -250,7 +270,10 @@ public class HomeFragment extends Fragment {
                     com.google.android.material.R.attr.colorPrimaryContainer)
                     : Color.TRANSPARENT;
             binding.chipFilters.setChipBackgroundColor(ColorStateList.valueOf(background));
+            refreshFeedChips();
         });
+
+        viewModel.getFeedLive().observe(getViewLifecycleOwner(), feed -> refreshFeedChips());
 
         viewModel.getMovies().observe(getViewLifecycleOwner(), movies -> {
             adapter.setMovies(movies);
@@ -289,6 +312,30 @@ public class HomeFragment extends Fragment {
             peopleAdapter.setPeople(people);
             binding.sectionPeople.setVisibility(people.isEmpty() ? View.GONE : View.VISIBLE);
         });
+    }
+
+    private void refreshFeedChips() {
+        if (binding == null) return;
+        updatingFeedChips = true;
+        if (viewModel.isCustomResults()) {
+            binding.chipFeeds.clearCheck();
+        } else {
+            binding.chipFeeds.check(chipIdFor(viewModel.getFeed()));
+        }
+        updatingFeedChips = false;
+    }
+
+    private int chipIdFor(HomeViewModel.Feed feed) {
+        switch (feed) {
+            case NOW_PLAYING:
+                return R.id.chipFeedNowPlaying;
+            case UPCOMING:
+                return R.id.chipFeedUpcoming;
+            case TOP_RATED:
+                return R.id.chipFeedTopRated;
+            default:
+                return R.id.chipFeedPopular;
+        }
     }
 
     private void renderLoading() {

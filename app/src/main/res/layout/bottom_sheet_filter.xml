@@ -19,7 +19,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Filteri"
+            android:text="@string/filters"
             android:textColor="?attr/colorOnSurface"
             android:textSize="22sp"
             android:textStyle="bold" />
@@ -28,7 +28,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
-            android:text="Žanr"
+            android:text="@string/genre"
             android:textColor="?attr/colorOnSurface"
             android:textSize="15sp"
             android:textStyle="bold" />
@@ -100,7 +100,7 @@
                 style="?attr/borderlessButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Resetuj" />
+                android:text="@string/reset" />
 
             <Space
                 android:layout_width="0dp"
@@ -112,7 +112,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:minWidth="160dp"
-                android:text="Primijeni" />
+                android:text="@string/apply" />
         </LinearLayout>
 
     </LinearLayout>

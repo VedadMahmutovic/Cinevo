@@ -13,7 +13,7 @@
         android:paddingTop="16dp"
         android:paddingEnd="20dp"
         android:paddingBottom="4dp"
-        android:text="Moji filmovi"
+        android:text="@string/my_movies"
         android:textColor="?attr/colorOnSurface"
         android:textSize="28sp"
         android:textStyle="bold" />
@@ -29,17 +29,17 @@
         <com.google.android.material.tabs.TabItem
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Favoriti" />
+            android:text="@string/list_favorites" />
 
         <com.google.android.material.tabs.TabItem
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Za gledanje" />
+            android:text="@string/list_watchlist" />
 
         <com.google.android.material.tabs.TabItem
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Pogledano" />
+            android:text="@string/list_watched" />
     </com.google.android.material.tabs.TabLayout>
 
     <FrameLayout
@@ -69,7 +69,7 @@
                 android:layout_width="64dp"
                 android:layout_height="64dp"
                 android:alpha="0.5"
-                android:contentDescription="Prazna lista"
+                android:contentDescription="@string/cd_empty_list"
                 android:src="@drawable/ic_bookmark"
                 app:tint="?attr/colorOnSurfaceVariant" />
 

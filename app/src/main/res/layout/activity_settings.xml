@@ -22,7 +22,7 @@
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Nazad"
+            android:contentDescription="@string/back"
             android:src="@drawable/ic_back"
             app:tint="?attr/colorOnSurface" />
 
@@ -31,7 +31,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="4dp"
             android:letterSpacing="0.08"
-            android:text="POSTAVKE"
+            android:text="@string/settings" android:textAllCaps="true"
             android:textColor="?attr/colorOnSurface"
             android:textSize="18sp"
             android:textStyle="bold" />

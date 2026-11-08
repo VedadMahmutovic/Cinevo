@@ -10,6 +10,7 @@ public class SavedMovie {
     public static final String FAVORITE = "FAVORITE";
     public static final String WATCHLIST = "WATCHLIST";
     public static final String WATCHED = "WATCHED";
+    public static final String DISMISSED = "DISMISSED";
 
     public int id;
 
