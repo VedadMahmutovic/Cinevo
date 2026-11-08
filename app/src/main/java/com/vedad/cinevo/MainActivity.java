@@ -1,10 +1,13 @@
 package com.vedad.cinevo;
 
 import android.os.Bundle;
+import android.os.SystemClock;
+import android.view.View;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
+import androidx.core.splashscreen.SplashScreen;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.navigation.NavController;
@@ -16,11 +19,33 @@ import com.vedad.cinevo.databinding.ActivityMainBinding;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final long MIN_SPLASH_MS = 600;
+
     private ActivityMainBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        SplashScreen splashScreen = SplashScreen.installSplashScreen(this);
         super.onCreate(savedInstanceState);
+
+        final long start = SystemClock.uptimeMillis();
+        splashScreen.setKeepOnScreenCondition(
+                () -> SystemClock.uptimeMillis() - start < MIN_SPLASH_MS);
+
+        splashScreen.setOnExitAnimationListener(provider -> {
+            View splash = provider.getView();
+            View icon = provider.getIconView();
+            if (icon != null) {
+                icon.animate().scaleX(1.12f).scaleY(1.12f).setDuration(260).start();
+            }
+            splash.animate()
+                    .alpha(0f)
+                    .setStartDelay(80)
+                    .setDuration(260)
+                    .withEndAction(provider::remove)
+                    .start();
+        });
+
         EdgeToEdge.enable(this);
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());

@@ -63,4 +63,5 @@ dependencies {
     androidTestImplementation(libs.espresso.core)
     implementation(libs.recyclerview)
     implementation(libs.preference)
+    implementation(libs.core.splashscreen)
 }

@@ -32,4 +32,6 @@
 
     <color name="cinevo_heart">#FF5A7A</color>
     <color name="cinevo_check">#4ADE80</color>
+
+    <color name="cinevo_splash_background">#6A4DF4</color>
 </resources>

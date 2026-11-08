@@ -40,4 +40,11 @@
         <item name="cornerSize">24dp</item>
     </style>
 
+    <style name="Theme.Cinevo.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/cinevo_splash_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher_foreground</item>
+        <item name="windowSplashScreenAnimationDuration">300</item>
+        <item name="postSplashScreenTheme">@style/Theme.Cinevo</item>
+    </style>
+
 </resources>
