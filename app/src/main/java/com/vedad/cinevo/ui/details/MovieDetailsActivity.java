@@ -2,6 +2,7 @@ package com.vedad.cinevo.ui.details;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
@@ -14,10 +15,13 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -66,6 +70,10 @@ public class MovieDetailsActivity extends AppCompatActivity {
     private ProviderAdapter rentAdapter;
     private ProviderAdapter buyAdapter;
     private CastAdapter castAdapter;
+    private android.view.View fullscreenView;
+    private WebChromeClient.CustomViewCallback fullscreenCallback;
+    private OnBackPressedCallback fullscreenBackCallback;
+    private FrameLayout fullscreenHost;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,6 +94,13 @@ public class MovieDetailsActivity extends AppCompatActivity {
         });
 
         binding.btnBack.setOnClickListener(v -> finish());
+        fullscreenBackCallback = new OnBackPressedCallback(false) {
+            @Override
+            public void handleOnBackPressed() {
+                exitFullscreen();
+            }
+        };
+        getOnBackPressedDispatcher().addCallback(this, fullscreenBackCallback);
 
         streamAdapter = new ProviderAdapter();
         rentAdapter = new ProviderAdapter();
@@ -412,7 +427,17 @@ public class MovieDetailsActivity extends AppCompatActivity {
         settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true);
         settings.setMediaPlaybackRequiresUserGesture(false);
-        trailerWebView.setWebChromeClient(new WebChromeClient());
+        trailerWebView.setWebChromeClient(new WebChromeClient() {
+            @Override
+            public void onShowCustomView(android.view.View view, CustomViewCallback callback) {
+                enterFullscreen(view, callback);
+            }
+
+            @Override
+            public void onHideCustomView() {
+                exitFullscreen();
+            }
+        });
 
         int initialHeight = (int) (getResources().getDisplayMetrics().widthPixels * 9f / 16f);
         binding.trailerContainer.addView(trailerWebView, new FrameLayout.LayoutParams(
@@ -434,7 +459,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
                 + "iframe{border:0;width:100%;height:100%}</style>"
                 + "</head><body>"
                 + "<iframe src='https://www.youtube.com/embed/" + videoKey + "?playsinline=1&rel=0' "
-                + "allow='autoplay; encrypted-media; picture-in-picture' allowfullscreen "
+                + "allow='autoplay; encrypted-media; picture-in-picture; fullscreen' allowfullscreen "
                 + "referrerpolicy='strict-origin-when-cross-origin'></iframe>"
                 + "</body></html>";
 
@@ -443,6 +468,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
     }
 
     private void hideTrailer() {
+        exitFullscreen();
         if (trailerWebView == null) return;
         binding.trailerContainer.removeAllViews();
         trailerWebView.loadUrl("about:blank");
@@ -525,5 +551,52 @@ public class MovieDetailsActivity extends AppCompatActivity {
         intent.putExtra(PersonMoviesActivity.EXTRA_PHOTO, photo);
         intent.putExtra(PersonMoviesActivity.EXTRA_ROLE, role);
         startActivity(intent);
+    }
+
+    private void enterFullscreen(android.view.View view, WebChromeClient.CustomViewCallback callback) {
+        if (fullscreenView != null) {
+            callback.onCustomViewHidden();
+            return;
+        }
+        fullscreenView = view;
+        fullscreenCallback = callback;
+
+        fullscreenHost = new FrameLayout(this);
+        fullscreenHost.setBackgroundColor(Color.BLACK);
+        fullscreenHost.addView(view, new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        ((ViewGroup) getWindow().getDecorView()).addView(fullscreenHost,
+                new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT));
+
+        fullscreenBackCallback.setEnabled(true);
+
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
+        WindowInsetsControllerCompat controller =
+                WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
+        controller.hide(WindowInsetsCompat.Type.systemBars());
+        controller.setSystemBarsBehavior(
+                WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+    }
+
+    private void exitFullscreen() {
+        if (fullscreenView == null) return;
+
+        if (fullscreenHost != null) {
+            fullscreenHost.removeView(fullscreenView);
+            ((ViewGroup) getWindow().getDecorView()).removeView(fullscreenHost);
+            fullscreenHost = null;
+        }
+        fullscreenView = null;
+
+        if (fullscreenCallback != null) {
+            fullscreenCallback.onCustomViewHidden();
+            fullscreenCallback = null;
+        }
+        fullscreenBackCallback.setEnabled(false);
+
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+        WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView())
+                .show(WindowInsetsCompat.Type.systemBars());
     }
 }

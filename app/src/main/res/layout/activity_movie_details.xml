@@ -494,6 +494,15 @@
         android:padding="24dp"
         android:visibility="gone">
 
+        <FrameLayout
+            android:id="@+id/fullscreenContainer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@android:color/black"
+            android:clickable="true"
+            android:focusable="true"
+            android:visibility="gone" />
+
         <TextView
             android:id="@+id/tvDetailsState"
             android:layout_width="wrap_content"
