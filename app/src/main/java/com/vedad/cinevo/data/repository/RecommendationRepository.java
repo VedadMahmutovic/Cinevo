@@ -17,6 +17,7 @@ import com.vedad.cinevo.model.PersonCredits;
 import com.vedad.cinevo.model.PersonSearchResponse;
 import com.vedad.cinevo.recommendation.RecommendationEngine;
 import com.vedad.cinevo.util.AppSettings;
+import com.vedad.cinevo.util.ResourceExplainText;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -44,10 +45,12 @@ public class RecommendationRepository {
     private final SavedMovieDao dao;
     private final AppSettings settings;
     private final TmdbApi api = RetrofitClient.getApi();
+    private final Context appContext;
 
     public RecommendationRepository(Context context) {
         dao = AppDatabase.getInstance(context).savedMovieDao();
         settings = new AppSettings(context);
+        appContext = context.getApplicationContext();
     }
 
     public List<Movie> compute() throws IOException {
@@ -130,10 +133,11 @@ public class RecommendationRepository {
                 excludeIds, RESULT_LIMIT);
 
         List<Movie> result = new ArrayList<>();
+        RecommendationEngine.ExplainText explainText = new ResourceExplainText(appContext);
         for (RecommendationEngine.ScoredMovie scored : ranked) {
             Movie m = scored.movie;
             m.setReason(RecommendationEngine.explain(m, profile,
-                    becauseOf.get(m.getId()), directorOfMovie.get(m.getId())));
+                    becauseOf.get(m.getId()), directorOfMovie.get(m.getId()), explainText));
             result.add(m);
             Log.d(TAG, String.format(Locale.US, "REC %s -> score %.3f | %s",
                     m.getTitle(), scored.score, m.getReason()));

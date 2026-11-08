@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.core.os.LocaleListCompat;
 import androidx.preference.PreferenceManager;
 
 public class AppSettings {
@@ -48,5 +49,11 @@ public class AppSettings {
 
     public String getWatchRegion() {
         return prefs.getString(KEY_WATCH_REGION, "BA");
+    }
+
+    public static LocaleListCompat localesFor(String value) {
+        if ("en".equals(value)) return LocaleListCompat.forLanguageTags("en");
+        if ("bs".equals(value)) return LocaleListCompat.forLanguageTags("bs");
+        return LocaleListCompat.getEmptyLocaleList();
     }
 }

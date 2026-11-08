@@ -16,6 +16,15 @@
             app:useSimpleSummaryProvider="true" />
     </PreferenceCategory>
 
+    <ListPreference
+        android:defaultValue="system"
+        android:entries="@array/language_entries"
+        android:entryValues="@array/language_values"
+        android:icon="@drawable/ic_language"
+        android:key="pref_language"
+        android:title="@string/pref_language_title"
+        app:useSimpleSummaryProvider="true" />
+
     <PreferenceCategory
         android:title="@string/pref_cat_recommendations"
         app:iconSpaceReserved="false">

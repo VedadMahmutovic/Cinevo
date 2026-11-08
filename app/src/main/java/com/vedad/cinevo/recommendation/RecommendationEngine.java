@@ -165,19 +165,60 @@ public class RecommendationEngine {
         return scored.size() > limit ? new ArrayList<>(scored.subList(0, limit)) : scored;
     }
 
+    // Tekstovi objašnjenja; aplikacija daje verziju iz resursa, a testovi koriste bosansku
+    public interface ExplainText {
+        String because(String firstTitle, int others);
+        String directedBy(String directorName);
+        String genres(String genreList);
+        String highlyRated(double rating);
+        String genreName(int genreId);
+    }
+
+    private static final ExplainText BOSNIAN = new ExplainText() {
+        @Override
+        public String because(String firstTitle, int others) {
+            return others == 0
+                    ? "Jer ti se sviđa " + firstTitle
+                    : "Jer ti se sviđa " + firstTitle + " i još " + others;
+        }
+
+        @Override
+        public String directedBy(String directorName) {
+            return "Režija: " + directorName;
+        }
+
+        @Override
+        public String genres(String genreList) {
+            return "Žanr: " + genreList;
+        }
+
+        @Override
+        public String highlyRated(double rating) {
+            return String.format(Locale.US, "Visoko ocijenjen (%.1f)", rating);
+        }
+
+        @Override
+        public String genreName(int genreId) {
+            return GenreCatalog.nameOf(genreId);
+        }
+    };
+
     public static String explain(Movie movie, Map<Integer, Double> profile,
                                  List<String> seedTitles, String directorName) {
+        return explain(movie, profile, seedTitles, directorName, BOSNIAN);
+    }
+
+    public static String explain(Movie movie, Map<Integer, Double> profile,
+                                 List<String> seedTitles, String directorName,
+                                 ExplainText text) {
         List<String> parts = new ArrayList<>();
 
         if (seedTitles != null && !seedTitles.isEmpty()) {
-            String first = seedTitles.get(0);
-            parts.add(seedTitles.size() == 1
-                    ? "Jer ti se sviđa " + first
-                    : "Jer ti se sviđa " + first + " i još " + (seedTitles.size() - 1));
+            parts.add(text.because(seedTitles.get(0), seedTitles.size() - 1));
         }
 
         if (directorName != null && !directorName.isEmpty()) {
-            parts.add("Režija: " + directorName);
+            parts.add(text.directedBy(directorName));
         }
 
         List<Integer> shared = new ArrayList<>();
@@ -190,13 +231,13 @@ public class RecommendationEngine {
             StringBuilder genres = new StringBuilder();
             for (int i = 0; i < Math.min(2, shared.size()); i++) {
                 if (i > 0) genres.append(", ");
-                genres.append(GenreCatalog.nameOf(shared.get(i)));
+                genres.append(text.genreName(shared.get(i)));
             }
-            parts.add("Žanr: " + genres);
+            parts.add(text.genres(genres.toString()));
         }
 
         if (parts.isEmpty()) {
-            parts.add(String.format(Locale.US, "Visoko ocijenjen (%.1f)", movie.getVoteAverage()));
+            parts.add(text.highlyRated(movie.getVoteAverage()));
         }
 
         StringBuilder result = new StringBuilder();

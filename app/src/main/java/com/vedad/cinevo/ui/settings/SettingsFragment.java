@@ -34,6 +34,14 @@ public class SettingsFragment extends PreferenceFragmentCompat {
             });
         }
 
+        Preference language = findPreference("pref_language");
+        if (language != null) {
+            language.setOnPreferenceChangeListener((preference, newValue) -> {
+                AppCompatDelegate.setApplicationLocales(AppSettings.localesFor((String) newValue));
+                return true;
+            });
+        }
+
         Preference clear = findPreference("pref_clear_saved");
         if (clear != null) {
             clear.setOnPreferenceClickListener(preference -> {

@@ -17,6 +17,7 @@ import com.vedad.cinevo.R;
 import com.vedad.cinevo.databinding.BottomSheetFilterBinding;
 import com.vedad.cinevo.model.MovieFilter;
 import com.vedad.cinevo.util.GenreCatalog;
+import com.vedad.cinevo.util.GenreLabels;
 
 import java.util.Calendar;
 import java.util.List;
@@ -73,7 +74,7 @@ public class FilterBottomSheet extends BottomSheetDialogFragment {
     private void setupGenres(MovieFilter current) {
         for (Map.Entry<Integer, String> entry : GenreCatalog.all().entrySet()) {
             Chip chip = new Chip(requireContext());
-            chip.setText(entry.getValue());
+            chip.setText(GenreLabels.of(requireContext(), entry.getKey()));
             chip.setTag(entry.getKey());
             chip.setCheckable(true);
             chip.setCheckedIconVisible(true);

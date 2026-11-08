@@ -145,4 +145,34 @@
     <string name="filter_rating_min">Minimalna ocjena: %1$.1f+</string>
     <string name="filter_runtime_any">Trajanje: bilo koje</string>
     <string name="filter_runtime_range">Trajanje: %1$d – %2$s min</string>
+
+    <string name="why_because">Jer ti se sviđa %1$s</string>
+    <string name="why_because_more">Jer ti se sviđa %1$s i još %2$d</string>
+    <string name="why_genre">Žanr: %1$s</string>
+    <string name="why_rating">Visoko ocijenjen (%1$.1f)</string>
+
+    <string name="pref_language_title">Jezik</string>
+    <string name="language_system">Prema sistemu</string>
+    <string name="language_bosnian">Bosanski</string>
+    <string name="language_english">English</string>
+
+    <string name="genre_28">Akcija</string>
+    <string name="genre_12">Avantura</string>
+    <string name="genre_16">Animirani</string>
+    <string name="genre_35">Komedija</string>
+    <string name="genre_80">Krimi</string>
+    <string name="genre_99">Dokumentarni</string>
+    <string name="genre_18">Drama</string>
+    <string name="genre_10751">Porodični</string>
+    <string name="genre_14">Fantazija</string>
+    <string name="genre_36">Historijski</string>
+    <string name="genre_27">Horor</string>
+    <string name="genre_10402">Muzički</string>
+    <string name="genre_9648">Misterija</string>
+    <string name="genre_10749">Romantika</string>
+    <string name="genre_878">Naučna fantastika</string>
+    <string name="genre_10770">TV film</string>
+    <string name="genre_53">Triler</string>
+    <string name="genre_10752">Ratni</string>
+    <string name="genre_37">Vestern</string>
 </resources>
