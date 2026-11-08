@@ -123,12 +123,12 @@ public class MovieDetailsActivity extends AppCompatActivity {
 
         viewModel.countOf(movieId, SavedMovie.FAVORITE).observe(this, count -> {
             isFavorite = count != null && count > 0;
-            binding.btnFavorite.setText(isFavorite ? "♥ U favoritima" : "♡ Favorit");
+            binding.btnFavorite.setText(isFavorite ? R.string.favorite_added : R.string.favorite_add);
         });
 
         viewModel.countOf(movieId, SavedMovie.WATCHLIST).observe(this, count -> {
             inWatchlist = count != null && count > 0;
-            binding.btnWatchlist.setText(inWatchlist ? "✓ Na listi" : "+ Za gledanje");
+            binding.btnWatchlist.setText(inWatchlist ? R.string.watchlist_added : R.string.watchlist_add);
         });
 
         binding.btnFavorite.setOnClickListener(v -> toggle(SavedMovie.FAVORITE, isFavorite));
@@ -138,8 +138,8 @@ public class MovieDetailsActivity extends AppCompatActivity {
             int half = rating == null ? 0 : rating;
             binding.ratingBar.setRating(half / 2f);
             binding.tvRatingHint.setText(half == 0
-                    ? "Ocijeni film"
-                    : "Tvoja ocjena: " + RatingFormatter.stars(half) + "/5");
+                    ? getString(R.string.rate_movie)
+                    : getString(R.string.rating_hint_set, RatingFormatter.stars(half)));
             binding.btnRemoveRating.setVisibility(
                     half == 0 ? android.view.View.GONE : android.view.View.VISIBLE);
         });
@@ -173,14 +173,14 @@ public class MovieDetailsActivity extends AppCompatActivity {
                             showContent();
                             showDetails(response.body());
                         } else {
-                            showError("Greška pri učitavanju filma (" + response.code() + ")");
+                            showError(getString(R.string.error_loading_movie_code, response.code()));
                         }
                     }
 
                     @Override
                     public void onFailure(Call<MovieDetails> call, Throwable t) {
                         if (isFinishing() || isDestroyed()) return;
-                        showError("Nema veze s internetom");
+                        showError(getString(R.string.error_no_internet));
                     }
                 });
     }
@@ -241,7 +241,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
         }
 
         binding.tvOverview.setText(TextUtils.isEmpty(d.getOverview())
-                ? "Opis nije dostupan." : d.getOverview());
+                ? getString(R.string.overview_missing) : d.getOverview());
 
         List<MovieDetails.Cast> allCast = new ArrayList<>();
         if (d.getCredits() != null && d.getCredits().getCast() != null) {
@@ -259,7 +259,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
         boolean hasMore = allCast.size() > 15;
         binding.btnCastAll.setVisibility(hasMore
                 ? android.view.View.VISIBLE : android.view.View.GONE);
-        binding.btnCastAll.setText("Pogledaj sve (" + allCast.size() + ")");
+        binding.btnCastAll.setText(getString(R.string.view_all_count, allCast.size()));
         binding.btnCastAll.setOnClickListener(v ->
                 new CastBottomSheet().show(getSupportFragmentManager(), "cast"));
 
@@ -269,7 +269,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
         } else {
             List<String> names = new ArrayList<>();
             for (MovieDetails.Crew c : directors) names.add(c.getName());
-            binding.tvDirector.setText("Režija: " + TextUtils.join(", ", names));
+            binding.tvDirector.setText(getString(R.string.directed_by, TextUtils.join(", ", names)));
             binding.tvDirector.setVisibility(android.view.View.VISIBLE);
             binding.tvDirector.setOnClickListener(v -> openDirector(directors));
         }
@@ -350,8 +350,8 @@ public class MovieDetailsActivity extends AppCompatActivity {
     private void showWatchProviders(MovieDetails d) {
         String region = new AppSettings(this).getWatchRegion();
         binding.sectionWatch.setVisibility(android.view.View.VISIBLE);
-        binding.tvWatchTitle.setText("Gdje gledati (" + regionName(region) + ")");
-        binding.tvWatchRegion.setText("Promijeni državu u postavkama");
+        binding.tvWatchTitle.setText(getString(R.string.where_to_watch_region, regionName(region)));
+        binding.tvWatchRegion.setText(R.string.change_region_hint);
         binding.tvWatchRegion.setOnClickListener(v ->
                 startActivity(new Intent(this, SettingsActivity.class)));
 
@@ -425,7 +425,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
             trailerWebView.setLayoutParams(params);
         });
 
-        binding.btnTrailer.setText("Sakrij trailer");
+        binding.btnTrailer.setText(R.string.trailer_hide);
         binding.btnTrailerExternal.setVisibility(android.view.View.VISIBLE);
 
         String html = "<!DOCTYPE html><html><head>"
@@ -451,7 +451,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
 
         binding.trailerContainer.setVisibility(android.view.View.GONE);
         binding.btnTrailerExternal.setVisibility(android.view.View.GONE);
-        binding.btnTrailer.setText("Pogledaj trailer");
+        binding.btnTrailer.setText(R.string.trailer_watch);
     }
 
     private void openTrailerExternally(String videoKey) {
@@ -509,7 +509,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
         String[] names = new String[directors.size()];
         for (int i = 0; i < names.length; i++) names[i] = directors.get(i).getName();
         new MaterialAlertDialogBuilder(this)
-                .setTitle("Izaberi reditelja")
+                .setTitle(R.string.choose_director)
                 .setItems(names, (dialog, which) -> {
                     MovieDetails.Crew c = directors.get(which);
                     openPerson(c.getId(), c.getName(), c.getProfilePath(),

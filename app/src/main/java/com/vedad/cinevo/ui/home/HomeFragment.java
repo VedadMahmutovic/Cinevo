@@ -202,10 +202,10 @@ public class HomeFragment extends Fragment {
 
         binding.chipSort.setOnClickListener(v -> {
             PopupMenu popup = new PopupMenu(requireContext(), binding.chipSort);
-            popup.getMenu().add(0, 1, 0, MovieFilter.sortLabel(MovieFilter.SORT_POPULARITY));
-            popup.getMenu().add(0, 2, 1, MovieFilter.sortLabel(MovieFilter.SORT_RATING));
-            popup.getMenu().add(0, 3, 2, MovieFilter.sortLabel(MovieFilter.SORT_DATE));
-            popup.getMenu().add(0, 4, 3, MovieFilter.sortLabel(MovieFilter.SORT_DATE_ASC));
+            popup.getMenu().add(0, 1, 0, SortLabels.full(MovieFilter.SORT_POPULARITY));
+            popup.getMenu().add(0, 2, 1, SortLabels.full(MovieFilter.SORT_RATING));
+            popup.getMenu().add(0, 3, 2, SortLabels.full(MovieFilter.SORT_DATE));
+            popup.getMenu().add(0, 4, 3, SortLabels.full(MovieFilter.SORT_DATE_ASC));
             popup.setOnMenuItemClickListener(item -> {
                 switch (item.getItemId()) {
                     case 2:
@@ -260,10 +260,10 @@ public class HomeFragment extends Fragment {
         });
 
         viewModel.getFilterLive().observe(getViewLifecycleOwner(), f -> {
-            binding.chipSort.setText(MovieFilter.sortShortLabel(f.sortBy) + " ▾");
+            binding.chipSort.setText(getString(R.string.sort_chip_format, getString(SortLabels.shortLabel(f.sortBy))));
 
             int count = f.activeCount();
-            binding.chipFilters.setText(count > 0 ? "Filteri · " + count : "Filteri");
+            binding.chipFilters.setText(count > 0 ? getString(R.string.filters_count, count) : getString(R.string.filters));
             binding.chipFilters.setCloseIconVisible(count > 0);
             int background = count > 0
                     ? MaterialColors.getColor(binding.chipFilters,

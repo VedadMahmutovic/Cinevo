@@ -167,7 +167,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
         } else {
             holder.binding.tvRating.setText(movie.getVoteAverage() > 0
                     ? String.format(Locale.US, "★ %.1f", movie.getVoteAverage())
-                    : "Novo");
+                    : holder.binding.getRoot().getContext().getString(R.string.rating_badge_new));
             holder.binding.tvRating.setBackgroundResource(R.drawable.bg_badge_dark);
         }
 

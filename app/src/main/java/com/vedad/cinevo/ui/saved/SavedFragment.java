@@ -13,6 +13,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 
 import com.google.android.material.tabs.TabLayout;
+import com.vedad.cinevo.R;
 import com.vedad.cinevo.data.local.SavedMovie;
 import com.vedad.cinevo.databinding.FragmentSavedBinding;
 import com.vedad.cinevo.model.Movie;
@@ -114,9 +115,9 @@ public class SavedFragment extends Fragment {
     }
 
     private String emptyMessage(String type) {
-        if (SavedMovie.WATCHLIST.equals(type)) return "Lista za gledanje je prazna.";
-        if (SavedMovie.WATCHED.equals(type)) return "Još nisi ocijenio nijedan film.";
-        return "Još nemaš favorita.";
+        if (SavedMovie.WATCHLIST.equals(type)) return getString(R.string.empty_watchlist);
+        if (SavedMovie.WATCHED.equals(type)) return getString(R.string.empty_watched);
+        return getString(R.string.empty_favorites);
     }
 
     @Override

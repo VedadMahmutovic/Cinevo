@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
+import com.vedad.cinevo.R;
 import com.vedad.cinevo.databinding.BottomSheetCastBinding;
 import com.vedad.cinevo.model.MovieDetails;
 import com.vedad.cinevo.ui.person.PersonMoviesActivity;
@@ -40,7 +41,7 @@ public class CastBottomSheet extends BottomSheetDialogFragment {
                 new ViewModelProvider(requireActivity()).get(MovieDetailsViewModel.class);
         List<MovieDetails.Cast> cast = viewModel.getFullCast();
 
-        binding.tvCastTitle.setText("Glumci (" + cast.size() + ")");
+        binding.tvCastTitle.setText(getString(R.string.cast_count, cast.size()));
 
         CastRowAdapter adapter = new CastRowAdapter();
         binding.recyclerFullCast.setLayoutManager(new LinearLayoutManager(requireContext()));

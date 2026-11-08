@@ -138,4 +138,11 @@
     <string name="cd_photo">Fotografija</string>
     <string name="cd_provider">Servis</string>
     <string name="cd_tmdb_logo">TMDB logo</string>
+
+    <string name="overview_missing">Opis nije dostupan.</string>
+    <string name="filter_years">Godina izdanja: %1$d – %2$d</string>
+    <string name="filter_rating_any">Minimalna ocjena: bilo koja</string>
+    <string name="filter_rating_min">Minimalna ocjena: %1$.1f+</string>
+    <string name="filter_runtime_any">Trajanje: bilo koje</string>
+    <string name="filter_runtime_range">Trajanje: %1$d – %2$s min</string>
 </resources>

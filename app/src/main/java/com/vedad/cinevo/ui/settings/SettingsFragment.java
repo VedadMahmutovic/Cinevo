@@ -53,24 +53,24 @@ public class SettingsFragment extends PreferenceFragmentCompat {
 
     private void confirmClear() {
         new MaterialAlertDialogBuilder(requireContext())
-                .setTitle("Obriši spremljene filmove?")
-                .setMessage("Svi favoriti i filmovi s liste za gledanje bit će obrisani. "
-                        + "Ovo se ne može poništiti.")
-                .setPositiveButton("Obriši", (dialog, which) -> {
+                .setTitle(R.string.clear_dialog_title)
+                .setMessage(R.string.clear_dialog_message)
+                        
+                .setPositiveButton(R.string.delete, (dialog, which) -> {
                     new SavedMovieRepository(requireContext()).clearAll();
                     Toast.makeText(requireContext(),
-                            "Spremljeni filmovi su obrisani", Toast.LENGTH_SHORT).show();
+                            getString(R.string.cleared_toast), Toast.LENGTH_SHORT).show();
                 })
-                .setNegativeButton("Odustani", null)
+                .setNegativeButton(R.string.cancel, null)
                 .show();
     }
 
     private void showAboutDialog() {
         DialogAboutBinding dialogBinding = DialogAboutBinding.inflate(getLayoutInflater());
         new MaterialAlertDialogBuilder(requireContext())
-                .setTitle("O aplikaciji")
+                .setTitle(R.string.pref_about_title)
                 .setView(dialogBinding.getRoot())
-                .setPositiveButton("U redu", null)
+                .setPositiveButton(R.string.ok, null)
                 .show();
     }
 

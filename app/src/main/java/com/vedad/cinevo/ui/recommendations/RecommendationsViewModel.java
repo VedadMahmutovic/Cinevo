@@ -8,6 +8,7 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.vedad.cinevo.R;
 import com.vedad.cinevo.data.local.SavedMovie;
 import com.vedad.cinevo.data.repository.RecommendationRepository;
 import com.vedad.cinevo.data.repository.SavedMovieRepository;
@@ -48,7 +49,7 @@ public class RecommendationsViewModel extends AndroidViewModel {
             try {
                 recommendations.postValue(repository.compute());
             } catch (IOException e) {
-                error.postValue("Nema veze s internetom");
+                error.postValue(getApplication().getString(R.string.error_no_internet));
             } finally {
                 loading.postValue(false);
             }

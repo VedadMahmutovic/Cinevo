@@ -52,8 +52,8 @@ public class RecommendationsFragment extends Fragment {
             viewModel.dismiss(movie);
 
             Snackbar snackbar = Snackbar.make(binding.getRoot(),
-                            "Uklonjeno iz preporuka", Snackbar.LENGTH_LONG)
-                    .setAction("Poništi", v -> viewModel.undoDismiss(movie, position));
+                            getString(R.string.rec_removed), Snackbar.LENGTH_LONG)
+                    .setAction(R.string.undo, v -> viewModel.undoDismiss(movie, position));
             View nav = requireActivity().findViewById(R.id.bottomNav);
             if (nav != null) snackbar.setAnchorView(nav);
             snackbar.show();
@@ -73,7 +73,7 @@ public class RecommendationsFragment extends Fragment {
             shown = new ArrayList<>(movies);
             adapter.setMovies(movies);
             binding.tvMessage.setText(
-                    "Još nema preporuka. Dodaj nekoliko filmova u favorite ili na listu za gledanje.");
+                    getString(R.string.rec_empty));
             binding.tvMessage.setVisibility(movies.isEmpty() ? View.VISIBLE : View.GONE);
         });
 
@@ -85,7 +85,7 @@ public class RecommendationsFragment extends Fragment {
         viewModel.getError().observe(getViewLifecycleOwner(), message -> {
             if (message == null) return;
             if (adapter.getItemCount() == 0) {
-                binding.tvMessage.setText(message + ". Dodirni Osvježi da pokušaš ponovo.");
+                binding.tvMessage.setText(getString(R.string.rec_error_retry, message));
                 binding.tvMessage.setVisibility(View.VISIBLE);
             } else {
                 Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();

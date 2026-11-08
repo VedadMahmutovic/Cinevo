@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.vedad.cinevo.R;
 import com.vedad.cinevo.databinding.ItemCastBinding;
 import com.vedad.cinevo.model.PersonSearchResponse;
 
@@ -48,7 +49,7 @@ public class PeopleAdapter extends RecyclerView.Adapter<PeopleAdapter.PersonView
 
         holder.binding.tvCastName.setText(person.getName());
         holder.binding.tvCastRole.setText(
-                "Directing".equals(person.getKnownForDepartment()) ? "Reditelj" : "Glumac");
+                "Directing".equals(person.getKnownForDepartment()) ? R.string.role_director : R.string.role_actor);
 
         String url = person.getProfilePath() != null
                 ? PHOTO_BASE_URL + person.getProfilePath()

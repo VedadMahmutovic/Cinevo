@@ -13,6 +13,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.android.material.chip.Chip;
+import com.vedad.cinevo.R;
 import com.vedad.cinevo.databinding.BottomSheetFilterBinding;
 import com.vedad.cinevo.model.MovieFilter;
 import com.vedad.cinevo.util.GenreCatalog;
@@ -104,21 +105,21 @@ public class FilterBottomSheet extends BottomSheetDialogFragment {
 
     private void updateLabels() {
         List<Float> years = binding.sliderYears.getValues();
-        binding.tvYears.setText(String.format(Locale.US, "Godina izdanja: %d – %d",
+        binding.tvYears.setText(getString(R.string.filter_years,
                 Math.round(years.get(0)), Math.round(years.get(1))));
 
         float rating = binding.sliderRating.getValue();
         binding.tvRating.setText(rating <= 0f
-                ? "Minimalna ocjena: bilo koja"
-                : String.format(Locale.US, "Minimalna ocjena: %.1f+", rating));
+                ? getString(R.string.filter_rating_any)
+                : getString(R.string.filter_rating_min, rating));
 
         List<Float> runtime = binding.sliderRuntime.getValues();
         int rMin = Math.round(runtime.get(0));
         int rMax = Math.round(runtime.get(1));
         if (rMin == 0 && rMax == RUNTIME_MAX) {
-            binding.tvRuntime.setText("Trajanje: bilo koje");
+            binding.tvRuntime.setText(R.string.filter_runtime_any);
         } else {
-            binding.tvRuntime.setText(String.format(Locale.US, "Trajanje: %d – %s min",
+            binding.tvRuntime.setText(getString(R.string.filter_runtime_range,
                     rMin, rMax == RUNTIME_MAX ? RUNTIME_MAX + "+" : String.valueOf(rMax)));
         }
     }

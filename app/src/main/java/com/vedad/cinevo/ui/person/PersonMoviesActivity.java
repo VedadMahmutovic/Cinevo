@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 
 import com.bumptech.glide.Glide;
 import com.vedad.cinevo.BuildConfig;
+import com.vedad.cinevo.R;
 import com.vedad.cinevo.data.remote.RetrofitClient;
 import com.vedad.cinevo.data.repository.SavedMovieRepository;
 import com.vedad.cinevo.databinding.ActivityPersonMoviesBinding;
@@ -73,7 +74,7 @@ public class PersonMoviesActivity extends AppCompatActivity {
 
         binding.tvPersonName.setText(getIntent().getStringExtra(EXTRA_NAME));
         binding.tvPersonRole.setText(ROLE_DIRECTOR.equals(role)
-                ? "Režirani filmovi" : "Najpoznatije uloge");
+                ? getString(R.string.person_directed) : getString(R.string.person_known_roles));
 
         String photo = getIntent().getStringExtra(EXTRA_PHOTO);
         if (photo != null) {
@@ -114,10 +115,10 @@ public class PersonMoviesActivity extends AppCompatActivity {
                             List<Movie> movies = buildMovies(response.body());
                             adapter.setMovies(movies);
                             if (movies.isEmpty()) {
-                                showState("Nema pronađenih filmova.", false);
+                                showState(getString(R.string.person_no_movies), false);
                             }
                         } else {
-                            showState("Greška pri učitavanju (" + response.code() + ")", true);
+                            showState(getString(R.string.error_loading_code, response.code()), true);
                         }
                     }
 
@@ -125,7 +126,7 @@ public class PersonMoviesActivity extends AppCompatActivity {
                     public void onFailure(Call<PersonCredits> call, Throwable t) {
                         if (isFinishing() || isDestroyed()) return;
                         binding.progressPerson.setVisibility(View.GONE);
-                        showState("Nema veze s internetom", true);
+                        showState(getString(R.string.error_no_internet), true);
                     }
                 });
     }

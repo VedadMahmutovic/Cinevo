@@ -1,12 +1,15 @@
 package com.vedad.cinevo.ui.home;
 
+import android.app.Application;
 import android.os.Parcelable;
 
+import androidx.annotation.NonNull;
+import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
 
 import com.vedad.cinevo.BuildConfig;
+import com.vedad.cinevo.R;
 import com.vedad.cinevo.data.remote.RetrofitClient;
 import com.vedad.cinevo.data.remote.TmdbApi;
 import com.vedad.cinevo.model.Movie;
@@ -23,7 +26,15 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class HomeViewModel extends ViewModel {
+public class HomeViewModel extends AndroidViewModel {
+
+    public HomeViewModel(@NonNull Application application) {
+        super(application);
+    }
+
+    private String text(int resId, Object... args) {
+        return getApplication().getString(resId, args);
+    }
 
     private static final String LANGUAGE = "en-US";
     private static final int TMDB_MAX_PAGES = 500;
@@ -130,12 +141,12 @@ public class HomeViewModel extends ViewModel {
                     if (!allMovies.isEmpty()) {
                         stateMessage.setValue(null);
                     } else if (!query.isEmpty()) {
-                        stateMessage.setValue(new StateMessage("Nema filmova za: " + query, false));
+                        stateMessage.setValue(new StateMessage(text(R.string.no_movies_for_query, query), false));
                     } else if (filter.isActive()) {
-                        stateMessage.setValue(new StateMessage("Nema filmova za odabrane filtere", false));
+                        stateMessage.setValue(new StateMessage(text(R.string.no_movies_for_filters), false));
                     }
                 } else {
-                    reportError("Greška pri učitavanju (" + response.code() + ")");
+                    reportError(text(R.string.error_loading_code, response.code()));
                 }
             }
 
@@ -144,7 +155,7 @@ public class HomeViewModel extends ViewModel {
                 if (call.isCanceled()) return;
                 isLoading = false;
                 loading.setValue(false);
-                reportError("Nema veze s internetom");
+                reportError(text(R.string.error_no_internet));
             }
         });
     }
