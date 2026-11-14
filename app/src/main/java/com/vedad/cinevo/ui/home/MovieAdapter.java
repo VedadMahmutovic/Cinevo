@@ -1,5 +1,6 @@
 package com.vedad.cinevo.ui.home;
 
+import android.view.HapticFeedbackConstants;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,6 +40,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
     private static final int FLAG_WATCHED = 4;
 
     private OnMovieClickListener dismissListener;
+    private OnMovieClickListener longClickListener;
 
     public interface OnMovieClickListener {
         void onMovieClick(Movie movie);
@@ -51,6 +53,9 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
 
     public void setOnMovieClickListener(OnMovieClickListener listener) {
         this.listener = listener;
+    }
+    public void setOnMovieLongClickListener(OnMovieClickListener listener) {
+        this.longClickListener = listener;
     }
 
     public void setFixedItemWidth(int widthPx) {
@@ -198,6 +203,13 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
 
         holder.binding.getRoot().setOnClickListener(v -> {
             if (listener != null) listener.onMovieClick(movie);
+        });
+
+        holder.binding.getRoot().setOnLongClickListener(v -> {
+            if (longClickListener == null) return false;
+            v.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+            longClickListener.onMovieClick(movie);
+            return true;
         });
     }
 

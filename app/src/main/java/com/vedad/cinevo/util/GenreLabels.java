@@ -37,4 +37,9 @@ public class GenreLabels {
         Integer res = RES.get(genreId);
         return res != null ? context.getString(res) : String.valueOf(genreId);
     }
+
+    public static String of(Context context, int genreId, String fallback) {
+        Integer res = RES.get(genreId);
+        return res != null ? context.getString(res) : fallback;
+    }
 }

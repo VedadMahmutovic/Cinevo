@@ -30,6 +30,7 @@ import com.bumptech.glide.Glide;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.vedad.cinevo.BuildConfig;
+import com.vedad.cinevo.MainActivity;
 import com.vedad.cinevo.R;
 import com.vedad.cinevo.data.local.SavedMovie;
 import com.vedad.cinevo.data.remote.RetrofitClient;
@@ -40,9 +41,11 @@ import com.vedad.cinevo.model.Movie;
 import com.vedad.cinevo.model.MovieDetails;
 import com.vedad.cinevo.ui.home.MovieAdapter;
 import com.vedad.cinevo.ui.person.PersonMoviesActivity;
+import com.vedad.cinevo.ui.preview.MoviePreviewSheet;
 import com.vedad.cinevo.ui.settings.SettingsActivity;
 import com.vedad.cinevo.util.AppSettings;
 import com.vedad.cinevo.util.GenreUtils;
+import com.vedad.cinevo.util.GenreLabels;
 import com.vedad.cinevo.util.RatingFormatter;
 
 import java.util.ArrayList;
@@ -127,6 +130,9 @@ public class MovieDetailsActivity extends AppCompatActivity {
             intent.putExtra(EXTRA_MOVIE_ID, movie.getId());
             startActivity(intent);
         });
+
+        similarAdapter.setOnMovieLongClickListener(movie ->
+                MoviePreviewSheet.show(getSupportFragmentManager(), movie));
 
         castAdapter = new CastAdapter();
         binding.recyclerCast.setLayoutManager(
@@ -244,9 +250,9 @@ public class MovieDetailsActivity extends AppCompatActivity {
         if (d.getGenres() != null) {
             for (MovieDetails.Genre g : d.getGenres()) {
                 Chip chip = new Chip(this);
-                chip.setText(g.getName());
-                chip.setClickable(false);
+                chip.setText(GenreLabels.of(this, g.getId(), g.getName()));
                 chip.setCheckable(false);
+                chip.setClickable(false);
                 binding.chipGroupGenres.addView(chip);
             }
         }

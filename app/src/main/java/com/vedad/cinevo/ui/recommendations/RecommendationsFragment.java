@@ -19,6 +19,7 @@ import com.vedad.cinevo.databinding.FragmentRecommendationsBinding;
 import com.vedad.cinevo.model.Movie;
 import com.vedad.cinevo.ui.details.MovieDetailsActivity;
 import com.vedad.cinevo.ui.home.MovieAdapter;
+import com.vedad.cinevo.ui.preview.MoviePreviewSheet;
 import com.vedad.cinevo.util.AppSettings;
 
 import java.util.ArrayList;
@@ -66,6 +67,9 @@ public class RecommendationsFragment extends Fragment {
             intent.putExtra(MovieDetailsActivity.EXTRA_MOVIE_ID, movie.getId());
             startActivity(intent);
         });
+
+        adapter.setOnMovieLongClickListener(movie ->
+                MoviePreviewSheet.show(getParentFragmentManager(), movie));
 
         binding.btnRefresh.setOnClickListener(v -> viewModel.load());
 

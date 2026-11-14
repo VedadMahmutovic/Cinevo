@@ -33,6 +33,7 @@ import com.vedad.cinevo.databinding.FragmentHomeBinding;
 import com.vedad.cinevo.model.MovieFilter;
 import com.vedad.cinevo.ui.details.MovieDetailsActivity;
 import com.vedad.cinevo.ui.person.PersonMoviesActivity;
+import com.vedad.cinevo.ui.preview.MoviePreviewSheet;
 import com.vedad.cinevo.ui.settings.SettingsActivity;
 import com.vedad.cinevo.util.AppSettings;
 
@@ -108,6 +109,9 @@ public class HomeFragment extends Fragment {
             intent.putExtra(MovieDetailsActivity.EXTRA_MOVIE_ID, movie.getId());
             startActivity(intent);
         });
+
+        adapter.setOnMovieLongClickListener(movie ->
+                MoviePreviewSheet.show(getParentFragmentManager(), movie));
 
         peopleAdapter = new PeopleAdapter();
         binding.recyclerPeople.setLayoutManager(

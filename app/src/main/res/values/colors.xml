@@ -34,4 +34,6 @@
     <color name="cinevo_check">#4ADE80</color>
 
     <color name="cinevo_splash_background">#0E1016</color>
+
+    <color name="cinevo_sheet_background">#FFFFFFFF</color>
 </resources>

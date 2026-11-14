@@ -21,6 +21,7 @@ import com.vedad.cinevo.model.Movie;
 import com.vedad.cinevo.model.PersonCredits;
 import com.vedad.cinevo.ui.details.MovieDetailsActivity;
 import com.vedad.cinevo.ui.home.MovieAdapter;
+import com.vedad.cinevo.ui.preview.MoviePreviewSheet;
 import com.vedad.cinevo.util.AppSettings;
 
 import java.util.ArrayList;
@@ -91,6 +92,9 @@ public class PersonMoviesActivity extends AppCompatActivity {
             intent.putExtra(MovieDetailsActivity.EXTRA_MOVIE_ID, movie.getId());
             startActivity(intent);
         });
+
+        adapter.setOnMovieLongClickListener(movie ->
+                MoviePreviewSheet.show(getSupportFragmentManager(), movie));
 
         binding.btnPersonBack.setOnClickListener(v -> finish());
         binding.btnPersonRetry.setOnClickListener(v -> load());

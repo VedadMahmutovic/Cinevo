@@ -23,4 +23,6 @@
 
     <color name="cinevo_icon_accent">#CFC3FF</color>
     <color name="cinevo_nav_background">#0A0C11</color>
+
+    <color name="cinevo_sheet_background">#FF161922</color>
 </resources>

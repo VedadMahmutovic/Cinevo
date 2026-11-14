@@ -173,4 +173,6 @@
     <string name="genre_53">Thriller</string>
     <string name="genre_10752">War</string>
     <string name="genre_37">Western</string>
+
+    <string name="preview_details">Details</string>
 </resources>

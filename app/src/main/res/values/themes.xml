@@ -47,4 +47,12 @@
         <item name="postSplashScreenTheme">@style/Theme.Cinevo</item>
     </style>
 
+    <style name="ThemeOverlay.Cinevo.TranslucentSheet" parent="ThemeOverlay.Material3.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/Widget.Cinevo.TranslucentBottomSheet</item>
+        <item name="android:backgroundDimAmount">0.2</item>
+    </style>
+
+    <style name="Widget.Cinevo.TranslucentBottomSheet" parent="Widget.Material3.BottomSheet">
+        <item name="backgroundTint">@color/cinevo_sheet_background</item>
+    </style>
 </resources>
