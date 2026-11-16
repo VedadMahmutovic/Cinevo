@@ -1,5 +1,6 @@
 package com.vedad.cinevo.ui.home;
 
+import android.text.TextUtils;
 import android.view.HapticFeedbackConstants;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -146,6 +147,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
 
         String date = movie.getReleaseDate();
         final String year = date != null && date.length() >= 4 ? date.substring(0, 4) : "";
+        final String lang = languageTag(movie);
 
         holder.boundMovieId = movie.getId();
         if (holder.runtimeCall != null) {
@@ -155,12 +157,13 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
 
         Integer cached = RuntimeRepository.getCached(movie.getId());
         if (cached != null) {
-            holder.binding.tvYear.setText(yearWithRuntime(year, cached));
+            holder.binding.tvYear.setText(meta(year, cached, lang));
         } else {
-            holder.binding.tvYear.setText(year);
+            holder.binding.tvYear.setText(meta(year, null, lang));
             holder.runtimeCall = RuntimeRepository.fetch(movie.getId(), minutes -> {
+                // Kartica je u međuvremenu mogla dobiti drugi film
                 if (holder.boundMovieId == movie.getId()) {
-                    holder.binding.tvYear.setText(yearWithRuntime(year, minutes));
+                    holder.binding.tvYear.setText(meta(year, minutes, lang));
                 }
             });
         }
@@ -226,9 +229,18 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
         holder.binding.statusRow.setVisibility(flags == 0 ? View.GONE : View.VISIBLE);
     }
 
-    private static String yearWithRuntime(String year, int minutes) {
-        String runtime = RuntimeFormatter.format(minutes);
-        return year.isEmpty() ? runtime : year + " · " + runtime;
+    private static String meta(String year, Integer minutes, String lang) {
+        List<String> parts = new ArrayList<>();
+        if (!year.isEmpty()) parts.add(year);
+        if (minutes != null) parts.add(RuntimeFormatter.format(minutes));
+        if (!lang.isEmpty()) parts.add(lang);
+        return TextUtils.join(" · ", parts);
+    }
+
+    private static String languageTag(Movie movie) {
+        String code = movie.getOriginalLanguage();
+        if (code == null || code.isEmpty() || "en".equals(code) || "xx".equals(code)) return "";
+        return code.toUpperCase(Locale.ROOT);
     }
 
     @Override

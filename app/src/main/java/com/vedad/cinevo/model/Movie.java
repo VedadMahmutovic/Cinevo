@@ -27,6 +27,9 @@ public class Movie {
     @SerializedName("vote_count")
     private int voteCount;
 
+    @SerializedName("original_language")
+    private String originalLanguage;
+
     public int getVoteCount() {
         return voteCount;
     }
@@ -43,6 +46,7 @@ public class Movie {
     public double getVoteAverage() { return voteAverage; }
     public int getUserRating() { return userRating; }
     public String getReleaseDate() { return releaseDate; }
+    public String getOriginalLanguage() { return originalLanguage; }
     public List<Integer> getGenreIds() {
         return genreIds != null ? genreIds : Collections.emptyList();
     }

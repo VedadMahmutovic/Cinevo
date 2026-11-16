@@ -177,4 +177,7 @@
     <string name="genre_37">Vestern</string>
 
     <string name="preview_details">Detalji</string>
+
+    <string name="filter_language">Jezik</string>
+    <string name="language_any">Svi jezici</string>
 </resources>

@@ -28,6 +28,9 @@ public class MovieDetails {
     @SerializedName("watch/providers")
     private WatchProviders watchProviders;
 
+    @SerializedName("original_language")
+    private String originalLanguage;
+
     private List<Genre> genres;
     private Videos videos;
     private Credits credits;
@@ -46,6 +49,7 @@ public class MovieDetails {
     public Credits getCredits() { return credits; }
     public Recommendations getRecommendations() { return recommendations; }
     public WatchProviders getWatchProviders() { return watchProviders; }
+    public String getOriginalLanguage() { return originalLanguage; }
 
     public static class Genre {
         private int id;

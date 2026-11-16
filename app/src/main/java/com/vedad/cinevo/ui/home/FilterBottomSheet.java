@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -18,7 +19,9 @@ import com.vedad.cinevo.databinding.BottomSheetFilterBinding;
 import com.vedad.cinevo.model.MovieFilter;
 import com.vedad.cinevo.util.GenreCatalog;
 import com.vedad.cinevo.util.GenreLabels;
+import com.vedad.cinevo.util.LanguageUtils;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
@@ -32,6 +35,9 @@ public class FilterBottomSheet extends BottomSheetDialogFragment {
     private BottomSheetFilterBinding binding;
     private HomeViewModel viewModel;
     private int yearMax;
+
+    private final List<String> languageCodes = new ArrayList<>();
+    private String selectedLanguage = "";
 
     @Nullable
     @Override
@@ -50,6 +56,7 @@ public class FilterBottomSheet extends BottomSheetDialogFragment {
         yearMax = Calendar.getInstance().get(Calendar.YEAR);
 
         setupGenres(current);
+        setupLanguages(current);
         setupYears(current);
         setupRating(current);
         setupRuntime(current);
@@ -134,6 +141,8 @@ public class FilterBottomSheet extends BottomSheetDialogFragment {
             }
         }
 
+        f.originalLanguage = selectedLanguage.isEmpty() ? null : selectedLanguage;
+
         List<Float> years = binding.sliderYears.getValues();
         int yFrom = Math.round(years.get(0));
         int yTo = Math.round(years.get(1));
@@ -157,5 +166,30 @@ public class FilterBottomSheet extends BottomSheetDialogFragment {
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
+    }
+
+    private void setupLanguages(MovieFilter current) {
+        languageCodes.clear();
+        List<String> labels = new ArrayList<>();
+
+        languageCodes.add("");
+        labels.add(getString(R.string.language_any));
+        for (String code : LanguageUtils.FILTER_LANGUAGES) {
+            languageCodes.add(code);
+            labels.add(LanguageUtils.displayName(requireContext(), code));
+        }
+
+        ArrayAdapter<String> adapter =
+                new ArrayAdapter<>(requireContext(), R.layout.item_dropdown, labels);
+        binding.dropdownLanguage.setAdapter(adapter);
+
+        int index = current.originalLanguage == null
+                ? 0 : languageCodes.indexOf(current.originalLanguage);
+        if (index < 0) index = 0;
+        selectedLanguage = languageCodes.get(index);
+        binding.dropdownLanguage.setText(labels.get(index), false);
+
+        binding.dropdownLanguage.setOnItemClickListener((parent, view, position, id) ->
+                selectedLanguage = languageCodes.get(position));
     }
 }

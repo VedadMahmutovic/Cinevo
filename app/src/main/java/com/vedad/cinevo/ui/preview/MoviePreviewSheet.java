@@ -27,6 +27,7 @@ import com.vedad.cinevo.model.Movie;
 import com.vedad.cinevo.model.MovieDetails;
 import com.vedad.cinevo.ui.details.MovieDetailsActivity;
 import com.vedad.cinevo.util.GenreLabels;
+import com.vedad.cinevo.util.LanguageUtils;
 import com.vedad.cinevo.util.RuntimeFormatter;
 
 import java.util.ArrayList;
@@ -48,6 +49,7 @@ public class MoviePreviewSheet extends BottomSheetDialogFragment {
     private static final String ARG_RATING = "rating";
     private static final String ARG_DATE = "date";
     private static final String ARG_GENRES = "genres";
+    private static final String ARG_LANG = "lang";
 
     private static final String POSTER_BASE_URL = "https://image.tmdb.org/t/p/w342";
 
@@ -73,6 +75,7 @@ public class MoviePreviewSheet extends BottomSheetDialogFragment {
         args.putString(ARG_POSTER, movie.getPosterPath());
         args.putDouble(ARG_RATING, movie.getVoteAverage());
         args.putString(ARG_DATE, movie.getReleaseDate());
+        args.putString(ARG_LANG, movie.getOriginalLanguage());
         args.putIntegerArrayList(ARG_GENRES, new ArrayList<>(movie.getGenreIds()));
 
         MoviePreviewSheet sheet = new MoviePreviewSheet();
@@ -90,6 +93,7 @@ public class MoviePreviewSheet extends BottomSheetDialogFragment {
     private String posterPath;
     private double rating;
     private String releaseDate;
+    private String originalLanguage;
     private ArrayList<Integer> genreIds;
 
     private boolean isFavorite = false;
@@ -114,6 +118,7 @@ public class MoviePreviewSheet extends BottomSheetDialogFragment {
         posterPath = args.getString(ARG_POSTER);
         rating = args.getDouble(ARG_RATING);
         releaseDate = args.getString(ARG_DATE);
+        originalLanguage = args.getString(ARG_LANG);
         genreIds = args.getIntegerArrayList(ARG_GENRES);
         if (genreIds == null) genreIds = new ArrayList<>();
 
@@ -210,6 +215,9 @@ public class MoviePreviewSheet extends BottomSheetDialogFragment {
         }
         if (runtimeMinutes != null) {
             parts.add(RuntimeFormatter.format(runtimeMinutes));
+        }
+        if (LanguageUtils.isKnown(originalLanguage)) {
+            parts.add(LanguageUtils.displayName(requireContext(), originalLanguage));
         }
         if (rating > 0) {
             parts.add(String.format(Locale.US, "★ %.1f", rating));

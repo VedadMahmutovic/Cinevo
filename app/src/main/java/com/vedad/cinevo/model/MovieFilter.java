@@ -26,12 +26,15 @@ public class MovieFilter {
     public float minRating = 0f;
     public Integer runtimeMin;
     public Integer runtimeMax;
+    public String originalLanguage;
     public String sortBy = SORT_POPULARITY;
+
     public boolean hasFilters() {
         return !genreIds.isEmpty()
                 || yearFrom != null || yearTo != null
                 || minRating > 0f
-                || runtimeMin != null || runtimeMax != null;
+                || runtimeMin != null || runtimeMax != null
+                || originalLanguage != null;
     }
 
     public boolean isActive() {
@@ -45,6 +48,23 @@ public class MovieFilter {
         return "Popularnost";
     }
 
+    public static String sortShortLabel(String sortBy) {
+        if (SORT_RATING.equals(sortBy)) return "Ocjena";
+        if (SORT_DATE.equals(sortBy)) return "Najnovije";
+        if (SORT_DATE_ASC.equals(sortBy)) return "Najstarije";
+        return "Popularno";
+    }
+
+    public int activeCount() {
+        int n = 0;
+        if (!genreIds.isEmpty()) n++;
+        if (yearFrom != null || yearTo != null) n++;
+        if (minRating > 0f) n++;
+        if (runtimeMin != null || runtimeMax != null) n++;
+        if (originalLanguage != null) n++;
+        return n;
+    }
+
     public MovieFilter copy() {
         MovieFilter c = new MovieFilter();
         c.genreIds = new LinkedHashSet<>(genreIds);
@@ -53,9 +73,11 @@ public class MovieFilter {
         c.minRating = minRating;
         c.runtimeMin = runtimeMin;
         c.runtimeMax = runtimeMax;
+        c.originalLanguage = originalLanguage;
         c.sortBy = sortBy;
         return c;
     }
+
     public Map<String, String> toQueryMap() {
         Map<String, String> map = new LinkedHashMap<>();
         map.put("sort_by", sortBy);
@@ -83,6 +105,8 @@ public class MovieFilter {
         if (runtimeMin != null) map.put("with_runtime.gte", String.valueOf(runtimeMin));
         if (runtimeMax != null) map.put("with_runtime.lte", String.valueOf(runtimeMax));
 
+        if (originalLanguage != null) map.put("with_original_language", originalLanguage);
+
         return map;
     }
 
@@ -103,7 +127,9 @@ public class MovieFilter {
         if (runtimeMin != null || runtimeMax != null) {
             parts.add(range(runtimeMin, runtimeMax, " min"));
         }
-
+        if (originalLanguage != null) {
+            parts.add(Locale.forLanguageTag(originalLanguage).getDisplayLanguage());
+        }
         return join(" • ", parts);
     }
 
@@ -120,21 +146,5 @@ public class MovieFilter {
             sb.append(item);
         }
         return sb.toString();
-    }
-
-    public int activeCount() {
-        int n = 0;
-        if (!genreIds.isEmpty()) n++;
-        if (yearFrom != null || yearTo != null) n++;
-        if (minRating > 0f) n++;
-        if (runtimeMin != null || runtimeMax != null) n++;
-        return n;
-    }
-
-    public static String sortShortLabel(String sortBy) {
-        if (SORT_RATING.equals(sortBy)) return "Ocjena";
-        if (SORT_DATE.equals(sortBy)) return "Najnovije";
-        if (SORT_DATE_ASC.equals(sortBy)) return "Najstarije";
-        return "Popularno";
     }
 }

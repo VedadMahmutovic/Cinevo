@@ -175,4 +175,7 @@
     <string name="genre_37">Western</string>
 
     <string name="preview_details">Details</string>
+
+    <string name="filter_language">Language</string>
+    <string name="language_any">All languages</string>
 </resources>

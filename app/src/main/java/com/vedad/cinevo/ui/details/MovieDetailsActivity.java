@@ -46,6 +46,7 @@ import com.vedad.cinevo.ui.settings.SettingsActivity;
 import com.vedad.cinevo.util.AppSettings;
 import com.vedad.cinevo.util.GenreUtils;
 import com.vedad.cinevo.util.GenreLabels;
+import com.vedad.cinevo.util.LanguageUtils;
 import com.vedad.cinevo.util.RatingFormatter;
 
 import java.util.ArrayList;
@@ -243,6 +244,10 @@ public class MovieDetailsActivity extends AppCompatActivity {
         }
         if (d.getRuntime() > 0) {
             info.add(d.getRuntime() + " min");
+        }
+
+        if (LanguageUtils.isKnown(d.getOriginalLanguage())) {
+            info.add(LanguageUtils.displayName(this, d.getOriginalLanguage()));
         }
         binding.tvInfo.setText(TextUtils.join("  •  ", info));
 
